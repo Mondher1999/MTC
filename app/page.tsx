@@ -1,8 +1,5 @@
-import TCMEducationLandingPage from "@/components/tcm-education-landing-page";
-import "./globals.css";
-import { DesignaliCreative } from "@/components/creative";
+import { redirect } from "next/navigation"
 
 export default function HomePage() {
-  return <DesignaliCreative />;
+  redirect("/dashboard")
 }
-

@@ -130,5 +130,3 @@ function FAQItem({ question, answer, isOpen, onToggle }: FAQItemProps) {
     </div>
   )
 }
-
-
