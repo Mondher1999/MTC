@@ -1,0 +1,448 @@
+/* app/globals.css - Fichier fusionné */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Définition des polices */
+@layer base {
+  :root {
+    --font-outfit: "Outfit", sans-serif;
+    --font-sans: var(--font-outfit);
+    --font-serif: var(--font-outfit); /* Utilisation de Outfit pour serif également pour la cohérence */
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+}
+
+/* Thème de couleurs (Clair et Sombre) */
+@layer base {
+  :root {
+    /* Palette de couleurs mise à jour sur le thème rouge pour la plateforme TCM */
+    --background: 0 0% 100%;
+    --foreground: 213 27% 34%;
+    --card: 327 73% 97%;
+    --card-foreground: 213 27% 34%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 213 27% 34%;
+    --primary: 346 75% 42%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 330 81% 60%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 327 73% 97%;
+    --muted-foreground: 213 27% 34%;
+    --accent: 25 95% 53%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 13% 91%;
+    --input: 244 10% 95%;
+    --ring: 346 75% 42%;
+    --chart-1: 346 75% 42%;
+    --chart-2: 330 81% 60%;
+    --chart-3: 45 93% 58%;
+    --chart-4: 48 96% 53%;
+    --chart-5: 142 76% 36%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 213 27% 34%;
+    --sidebar-primary: 327 73% 97%;
+    --sidebar-primary-foreground: 213 27% 34%;
+    --sidebar-accent: 330 81% 60%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 346 75% 42%;
+  }
+
+  .dark {
+    /* Couleurs du mode sombre mises à jour pour maintenir la cohérence du thème rouge */
+    --background: 213 27% 8%;
+    --foreground: 327 73% 97%;
+    --card: 213 27% 8%;
+    --card-foreground: 327 73% 97%;
+    --popover: 213 27% 8%;
+    --popover-foreground: 327 73% 97%;
+    --primary: 346 75% 42%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 330 81% 60%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 213 27% 15%;
+    --muted-foreground: 327 73% 70%;
+    --accent: 25 95% 53%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 213 27% 15%;
+    --input: 213 27% 15%;
+    --ring: 346 75% 42%;
+    --chart-1: 346 75% 50%;
+    --chart-2: 330 81% 65%;
+    --chart-3: 45 93% 65%;
+    --chart-4: 48 96% 60%;
+    --chart-5: 142 76% 45%;
+    --sidebar-background: 213 27% 10%;
+    --sidebar-foreground: 327 73% 95%;
+    --sidebar-primary: 346 75% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 213 27% 16%;
+    --sidebar-accent-foreground: 327 73% 95%;
+    --sidebar-border: 213 27% 16%;
+    --sidebar-ring: 346 75% 42%;
+  }
+}
+
+/* Styles de base et comportement de défilement */
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Utilitaires personnalisés */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Keyframes d'animation améliorées pour des effets modernes et élégants */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px hsla(var(--primary) / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px hsla(var(--primary) / 0.6);
+  }
+}
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+@keyframes bounce-gentle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes rotate-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes slide-up-stagger {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes scale-bounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes text-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+@keyframes float-particles {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.7;
+  }
+  33% {
+    transform: translateY(-30px) rotate(120deg);
+    opacity: 1;
+  }
+  66% {
+    transform: translateY(-15px) rotate(240deg);
+    opacity: 0.8;
+  }
+}
+
+/* Classes d'animation avancées pour des interactions sophistiquées */
+.animate-fade-in { animation: fadeInUp 0.8s ease-out forwards; }
+.animate-fade-in-left { animation: fadeInLeft 0.8s ease-out forwards; }
+.animate-fade-in-right { animation: fadeInRight 0.8s ease-out forwards; }
+.animate-scale-in { animation: scaleIn 0.6s ease-out forwards; }
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+.animate-bounce-gentle { animation: bounce-gentle 2s ease-in-out infinite; }
+.animate-rotate-slow { animation: rotate-slow 20s linear infinite; }
+.animate-slide-up-stagger { animation: slide-up-stagger 0.6s ease-out forwards; }
+.animate-scale-bounce { animation: scale-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+
+/* Effets de survol améliorés avec des transitions sophistiquées */
+.hover-lift {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px hsla(var(--primary) / 0.1);
+}
+.hover-scale {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hover-scale:hover {
+  transform: scale(1.08);
+}
+.hover-glow {
+  transition: all 0.3s ease;
+  position: relative;
+}
+.hover-glow:hover {
+  box-shadow: 0 0 30px hsla(var(--primary) / 0.4);
+}
+.hover-slide {
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+.hover-slide::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+.hover-slide:hover::before {
+  left: 100%;
+}
+
+/* Micro-interactions améliorées pour les cartes et les boutons */
+.card-hover {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+.card-hover:hover {
+  transform: translateY(-12px) rotateX(5deg) rotateY(5deg);
+  box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px hsla(var(--primary) / 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Effet de bouton magnétique pour les CTA */
+.magnetic-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+.magnetic-button:hover {
+  transform: scale(1.05);
+}
+.magnetic-button::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--primary)));
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: -1;
+  animation: rotate-slow 3s linear infinite;
+}
+.magnetic-button:hover::after {
+  opacity: 0.7;
+}
+
+/* Délais d'animation en cascade pour des révélations séquentielles */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+.stagger-6 { animation-delay: 0.6s; }
+.stagger-delay-1 { animation-delay: 0.1s; }
+.stagger-delay-2 { animation-delay: 0.2s; }
+.stagger-delay-3 { animation-delay: 0.3s; }
+.stagger-delay-4 { animation-delay: 0.4s; }
+
+/* Arrière-plans en dégradé mis à jour avec le thème rouge/bleu */
+.gradient-bg-primary {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.05) 0%, hsl(var(--primary) / 0.1) 50%, hsl(var(--primary) / 0.2) 100%);
+}
+.gradient-bg-secondary {
+  background: linear-gradient(135deg, hsl(var(--secondary) / 0.05) 0%, hsl(var(--secondary) / 0.1) 50%, hsl(var(--secondary) / 0.2) 100%);
+}
+.gradient-bg-hero {
+  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--primary) / 0.05) 30%, hsl(var(--secondary) / 0.05) 70%, hsl(var(--background)) 100%);
+}
+
+/* Effets de parallaxe et déclenchés par le défilement */
+.parallax-slow {
+  transform: translateZ(0);
+  will-change: transform;
+}
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Effets de bouton morphing */
+.morph-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.morph-button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+.morph-button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Effet de particules flottantes pour la section hero */
+.floating-particle {
+  animation: float-particles 8s ease-in-out infinite;
+}
+.floating-particle:nth-child(2) { animation-delay: -2s; }
+.floating-particle:nth-child(3) { animation-delay: -4s; }
+.floating-particle:nth-child(4) { animation-delay: -6s; }
+
+/* Animation de révélation de texte pour les titres */
+.text-reveal {
+  overflow: hidden;
+}
+.text-reveal span {
+  display: inline-block;
+  animation: text-reveal 0.8s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+/* Effet d'ondulation pour les éléments interactifs */
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-effect::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+.ripple-effect:active::before {
+  width: 300px;
+  height: 300px;
+  transition: 0s;
+}
