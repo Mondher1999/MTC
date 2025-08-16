@@ -3,27 +3,35 @@
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { AuthForm } from "./auth-form"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+
+import { useAuth } from "../../contexts/AuthContext"
+
 
 export default function AuthBasic() {
+
+
+  const { user, loading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/dashboard");
+    }
+  }, [user, loading, router]);
+
+
   return (
-    <main
-      className="
-        flex flex-col min-h-screen items-center justify-center p-4 
-        overflow-hidden bg-zinc-950 relative
-      "
-    >
+    <main className="flex flex-col min-h-screen items-center justify-center p-4 overflow-hidden bg-zinc-950 relative">
       {/* Dégradé animé */}
       <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black animate-gradient" />
 
       {/* Orb rouge flottant */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] 
-        bg-red-500/20 rounded-full blur-3xl animate-orb1
-      " />
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-red-500/20 rounded-full blur-3xl animate-orb1" />
 
       {/* Orb bleuté flottant */}
-      <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] 
-        bg-blue-500/15 rounded-full blur-3xl animate-orb2
-      " />
+      <div className="absolute bottom-[-15%] right-[-10%] w-[45%] h-[45%] bg-blue-500/15 rounded-full blur-3xl animate-orb2" />
 
       <div className="w-full max-w-md z-10 flex flex-col items-center animate-fadeIn">
         {/* Logo */}
@@ -37,18 +45,12 @@ export default function AuthBasic() {
           />
         </div>
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-medium tracking-tight text-gray-200">
-          Se Connecter à MTC
-
-          </h1>
-          <p className="text-base text-gray-200 mt-2">
-          Accéder à votre Dashboard
-          </p>
+          <h1 className="text-3xl font-medium tracking-tight text-gray-200">Se Connecter à MTC</h1>
+          <p className="text-base text-gray-200 mt-2">Accéder à votre Dashboard</p>
         </div>
 
         {/* Carte principale */}
         <Card className="relative w-full backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-2xl shadow-black/40 overflow-hidden animated-border">
-
           <CardContent className="p-8">
             <AuthForm />
           </CardContent>
@@ -57,14 +59,12 @@ export default function AuthBasic() {
 
       {/* Styles d’animations */}
       <style jsx global>{`
-      
         @keyframes gradient {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
-          
-          .animated-border::before {
+        .animated-border::before {
           content: "";
           position: absolute;
           inset: 0;
@@ -85,7 +85,6 @@ export default function AuthBasic() {
           pointer-events: none;
           z-index: 1;
         }
-
         @keyframes borderMove {
           0% { background-position: 200% 0; } /* départ à droite */
           100% { background-position: 0% 0; }  /* fin à gauche */

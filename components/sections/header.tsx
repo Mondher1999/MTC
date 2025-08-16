@@ -3,9 +3,11 @@
 import { GraduationCap } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,29 +68,42 @@ export function Header() {
 
 
             {/* Boutons */}
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/auth"
-                className="bg-gradient-to-br from-red-500 to-red-700 text-white px-5 py-2.5 rounded-lg font-semibold transform transition-all duration-300 shadow-lg shadow-red-500/40 hover:scale-105 hover:shadow-xl hover:shadow-red-500/60 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                Connexion
-              </Link>
-              <a
-                onClick={(e) => {
-    e.preventDefault();
-    const section = document.getElementById("contact");
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
-      // Retire le hash proprement
-      window.history.pushState(null, "", window.location.pathname);
-    }
-  }}
-                href="#contact"
-                className="bg-gradient-to-br from-black to-black text-white px-5 py-2.5 rounded-lg font-semibold transform transition-all duration-300 shadow-lg shadow-red-500/40 hover:scale-105 hover:shadow-xl hover:shadow-red-500/60 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                Inscription
-              </a>
-            </div>
+           
+    <div className="flex items-center space-x-4">
+      {user ? (
+        // Si l'utilisateur est connecté
+        <Link
+          href="/dashboard"
+          className="bg-gradient-to-br from-red-500 to-red-700 text-white px-5 py-2.5 rounded-lg font-semibold transform transition-all duration-300 shadow-lg shadow-red-500/40 hover:scale-105 hover:shadow-xl hover:shadow-red-500/60 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+          Tableau de bord
+        </Link>
+      ) : (
+        <>
+          <Link
+            href="/auth"
+            className="bg-gradient-to-br from-red-500 to-red-700 text-white px-5 py-2.5 rounded-lg font-semibold transform transition-all duration-300 shadow-lg shadow-red-500/40 hover:scale-105 hover:shadow-xl hover:shadow-red-500/60 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            Connexion
+          </Link>
+
+          <a
+            onClick={(e) => {
+              e.preventDefault();
+              const section = document.getElementById("contact");
+              if (section) {
+                section.scrollIntoView({ behavior: "smooth" });
+                window.history.pushState(null, "", window.location.pathname);
+              }
+            }}
+            href="#contact"
+            className="bg-gradient-to-br from-black to-black text-white px-5 py-2.5 rounded-lg font-semibold transform transition-all duration-300 shadow-lg shadow-red-500/40 hover:scale-105 hover:shadow-xl hover:shadow-red-500/60 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            Inscription
+          </a>
+        </>
+      )}
+    </div>
           </div>
         </div>
       </div>

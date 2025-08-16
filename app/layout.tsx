@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Outfit } from "next/font/google"
 import "./globals.css"
+import { AuthProvider } from "../contexts/AuthContext"
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -23,7 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={outfit.variable}>
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   )
 }

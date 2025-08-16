@@ -1,10 +1,9 @@
-/*"use client"
+"use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { User } from "firebase/auth"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth } from "@/lib/firebase"
-import { fetchUserByEmail } from "@/services/Service"
 
 interface AuthContextType {
   user: User | null
@@ -35,22 +34,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (firebaseUser) => {
         if (firebaseUser) {
           setUser(firebaseUser)
-          try {
-            if (!firebaseUser.email) {
-              setError(new Error("Email not available"))
-              setLoading(false)
-              return
-            }
-            const userData = await fetchUserByEmail(firebaseUser.email)
-            setRole(userData.role)
-            setName(userData.name)
-          } catch (error) {
-            console.error("Error fetching user role:", error)
-            setRole(null)
-          }
+          // For now, set default role and name to avoid API dependency issues
+          setRole("user")
+          setName(firebaseUser.displayName || firebaseUser.email || "User")
         } else {
           setUser(null)
           setRole(null)
+          setName(null)
         }
         setLoading(false)
       },
@@ -67,4 +57,3 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export const useAuth = () => useContext(AuthContext)
-*/
