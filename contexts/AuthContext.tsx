@@ -1,72 +1,91 @@
-"use client"
+"use client";
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import type { User } from "firebase/auth"
-import { onAuthStateChanged } from "firebase/auth"
-import { auth } from "@/lib/firebase"
-import { fetchUserByEmail } from "@/services/Service"
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { login as loginService, logout as logoutService } from "@/services/authService";
+import api from "@/utils/axiosInstance";
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+}
 
 interface AuthContextType {
-  user: User | null
-  loading: boolean
-  error: Error | null
-  role: string | null
-  name: string | null
+  user: User | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  error: null,
-  role: null,
-  name: null,
-})
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<Error | null>(null)
-  const [role, setRole] = useState<string | null>(null)
-  const [name, setName] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      async (firebaseUser) => {
-        if (firebaseUser) {
-          setUser(firebaseUser);
-          try {
-            // Fetch the user details from Firestore using the user ID
-            if (!firebaseUser.email) {
-              setError(new Error("Email not available"));
-              setLoading(false);
-              return;
-            }
-            const userData = await fetchUserByEmail(firebaseUser.email);
-            
-
-            setRole(userData.role); // Set the role based on the fetched data
-            setName(userData.name); // Set the name based on the fetched data
-          } catch (error) {
-            console.error("Error fetching user role:", error);
-            setRole(null);
-          }
-        } else {
-          setUser(null);
-          setRole(null);
-        }
+    const fetchUser = async () => {
+      // ✅ Prevent SSR errors
+      if (typeof window === "undefined") return;
+  
+      const token = localStorage.getItem("accessToken");
+  
+      if (!token) {
+        setUser(null);
         setLoading(false);
-      },
-      (error) => {
-        setError(error);
+        return;
+      }
+  
+      try {
+        // ✅ Re-apply token after reload
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  
+        const res = await api.get("/auth/me");
+        setUser(res.data);
+      } catch (err) {
+        console.error("Auth error:", err);
+        setUser(null);
+  
+        // (optional) Clear invalid tokens
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+      } finally {
         setLoading(false);
       }
-    );
-
-    return () => unsubscribe();
+    };
+  
+    fetchUser();
   }, []);
+    
 
-  return <AuthContext.Provider value={{ user, loading, error, role, name }}>{children}</AuthContext.Provider>
+  const login = async (email: string, password: string) => {
+    const data = await loginService(email, password);
+
+    localStorage.setItem("accessToken", data.accessToken);
+    localStorage.setItem("refreshToken", data.refreshToken);
+
+    api.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
+
+    setUser(data.user);
+  };
+
+  const logout = async () => {
+    await logoutService();
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export const useAuth = () => useContext(AuthContext)
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used inside AuthProvider");
+  return context;
+};

@@ -8,10 +8,9 @@ import { useRouter } from "next/navigation"
 import Modal from "@/components/Modal/modalAdd"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons"
-import { auth } from "@/lib/firebase"
-import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth"
-import { useAuth } from "../../contexts/AuthContext"
 import { useLoading } from "@/contexts/LoadingContext"
+import { useAuth } from "@/contexts/AuthContext"
+import api from "@/utils/axiosInstance"
 
 export function AuthForm() {
   // --- State for the main login form ---
@@ -26,7 +25,8 @@ export function AuthForm() {
   const [resetError, setResetError] = useState<string | null>(null)
   const [resetSuccess, setResetSuccess] = useState<string | null>(null)
 
-  const { user, loading } = useAuth()
+const { login } = useAuth()
+
   const router = useRouter()
   const { startLoading } = useLoading()
 
@@ -42,29 +42,12 @@ export function AuthForm() {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, motDePasse)
+      await login(email, motDePasse) // calls backend /auth/login
       startLoading()
       router.push("/dashboard")
     } catch (error) {
       console.error("Sign-In Error:", error)
-      // More robust Firebase error handling
-      if (error instanceof Error && "code" in error) {
-        const firebaseErrorCode = (error as { code: string }).code
-        switch (firebaseErrorCode) {
-          case "auth/user-not-found":
-          case "auth/wrong-password":
-          case "auth/invalid-credential":
-            setErreur("Email ou mot de passe incorrect. Veuillez réessayer.")
-            break
-          case "auth/invalid-email":
-            setErreur("Le format de l'adresse email est invalide.")
-            break
-          default:
-            setErreur("Une erreur est survenue lors de la connexion. Veuillez réessayer.")
-        }
-      } else {
-        setErreur("Une erreur inconnue est survenue.")
-      }
+      setErreur("Email ou mot de passe incorrect. Veuillez réessayer.")
     }
   }
 
@@ -90,20 +73,11 @@ export function AuthForm() {
     }
 
     try {
-      await sendPasswordResetEmail(auth, resetEmail)
+      await api.post("/auth/forgot-password", { email: resetEmail })
       setResetSuccess("Un email de réinitialisation a été envoyé. Veuillez vérifier votre boîte de réception.")
     } catch (error) {
       console.error("Password Reset Error:", error)
-      if (error instanceof Error && "code" in error) {
-        const firebaseErrorCode = (error as { code: string }).code
-        if (firebaseErrorCode === "auth/user-not-found") {
-          setResetError("Aucun utilisateur trouvé avec cette adresse email.")
-        } else {
-          setResetError("Une erreur est survenue. Veuillez réessayer.")
-        }
-      } else {
-        setResetError("Une erreur inconnue est survenue.")
-      }
+      setResetError("Une erreur est survenue. Veuillez réessayer.")
     }
   }
 
@@ -179,10 +153,10 @@ export function AuthForm() {
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={loading}
+          
           className="relative h-12 w-full overflow-hidden rounded-lg bg-red-600 font-bold text-white transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:bg-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] disabled:cursor-not-allowed disabled:bg-red-800"
         >
-          {loading ? "Connexion..." : "Se connecter"}
+          
         </button>
       </form>
 

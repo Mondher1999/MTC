@@ -16,9 +16,10 @@ import { useAuth } from "@/contexts/AuthContext"
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard")
-  const { role,name } = useAuth();
-
  
+  const { user } = useAuth(); // ✅ top-level
+
+
   
   return (
     <DashboardLayout>
@@ -27,7 +28,7 @@ export function Dashboard() {
           <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <TabsList
         className={`grid w-full max-w-[800px] rounded-3xl p-1 ${
-          role === "etudiant" ? "grid-cols-3" : "grid-cols-4"
+          user?.role === "etudiant" ? "grid-cols-3" : "grid-cols-4"
         }`}
 >
               <TabsTrigger
@@ -57,7 +58,7 @@ export function Dashboard() {
               </TabsTrigger>
             {/* Conditionnel : n'affiche que si le rôle n'est pas "etudiant" */}
             {/* Conditionnel : n'affiche que si le rôle n'est pas "etudiant" */}
-            {role !== "etudiant" && (
+            {user?.role !== "etudiant" && (
               <TabsTrigger
                 value="users"
                 className="flex w-full items-center gap-2 rounded-xl data-[state=active]:rounded-xl"

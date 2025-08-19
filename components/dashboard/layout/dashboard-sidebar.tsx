@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { Radio, Settings, Search, ChevronDown, X, Stethoscope, Clock, CheckCircle } from "lucide-react"
-
 import { sidebarItems } from "../data/sidebar-data"
 import { useAuth } from "@/contexts/AuthContext"
 
@@ -20,7 +19,7 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ sidebarOpen, mobileMenuOpen, setMobileMenuOpen }: DashboardSidebarProps) {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({})
-  const { role,name } = useAuth();
+  const { user } = useAuth()
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) => ({
@@ -164,10 +163,10 @@ export function DashboardSidebar({ sidebarOpen, mobileMenuOpen, setMobileMenuOpe
                 <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
                 <AvatarFallback>DR</AvatarFallback>
               </Avatar>
-              <span>{name}</span>
+              <span>{user?.name}</span>
             </div>
             <Badge variant="outline" className="ml-auto">
-             {role}
+             {user?.role}
             </Badge>
           </button>
         </div>

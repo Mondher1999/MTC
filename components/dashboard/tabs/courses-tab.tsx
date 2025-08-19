@@ -16,7 +16,7 @@ import { useAuth } from "@/contexts/AuthContext"
 export function CoursesTab() {
   const [showRecordedCourseModal, setShowRecordedCourseModal] = useState(false)
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
-  const { role,name } = useAuth();
+  const { user } = useAuth()
 
   const handleCourseAdded = () => {
     setShowRecordedCourseModal(false)
@@ -46,7 +46,7 @@ export function CoursesTab() {
               </p>
             </div>
             <div className="flex gap-2">
-            {role === "admin" && (
+            {user?.role === "admin" && (
               <Button
                 onClick={() => setShowRecordedCourseModal(true)}
                 className="w-fit rounded-2xl g-gradient-to-r from-red-600 text-white hover:bg-white/20 border border-white/20"

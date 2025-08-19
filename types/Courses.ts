@@ -11,6 +11,7 @@ export interface LiveCourses {
 }
 
 export interface NewRecordedCourse {
+  id?: string; 
   courseName: string
   description: string
   videoLink: string
@@ -22,6 +23,3 @@ export interface NewRecordedCourse {
 }
 
 
-export interface RecordedCourse extends NewRecordedCourse {
-  id: string
-}

@@ -23,10 +23,11 @@ import {
   ChevronDown,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { signOut } from "firebase/auth"
-import { auth } from "@/lib/firebase"
+
 import { useLoading } from "@/contexts/LoadingContext"
 import { useAuth } from "@/contexts/AuthContext"
+
+
 
 interface DashboardHeaderProps {
   sidebarOpen: boolean
@@ -38,20 +39,21 @@ export function DashboardHeader({ sidebarOpen, setSidebarOpen, setMobileMenuOpen
   const notifications = 3
   const router = useRouter()
   const { startLoading, stopLoading } = useLoading()
-  const { role,name } = useAuth();
-  const handleSignOut = async () => {
-    try {
-      startLoading()
-      await signOut(auth)
-      setTimeout(() => {
-        stopLoading()
-        router.push("/auth")
-      }, 1000)
-    } catch (error) {
-      console.error("Error signing out:", error)
-      stopLoading()
-    }
+
+  const { user, logout: authLogout } = useAuth()
+
+
+const handleSignOut = async () => {
+  try {
+    startLoading();
+    await authLogout(); // <-- use the logout from AuthContext
+    stopLoading();
+    router.push("/auth");
+  } catch (error) {
+    console.error("Error signing out:", error);
+    stopLoading();
   }
+};
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur">
@@ -104,8 +106,8 @@ export function DashboardHeader({ sidebarOpen, setSidebarOpen, setMobileMenuOpen
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden sm:flex flex-col items-start">
-                  <span className="text-sm font-medium">{name}</span>
-                  <span className="text-xs text-muted-foreground">{role}</span>
+                  <span className="text-sm font-medium">{user?.name}</span>
+                  <span className="text-xs text-muted-foreground">{user?.role}</span>
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </Button>

@@ -2,7 +2,7 @@ import { RideSchedule } from "../types/RideSchedule";
 import { fetchAPI } from "../lib/api";
 import { Clients, Users } from "../types/Clients";
 import { NewRide } from "@/types/RideSchedule";
-import { Courses } from "@/types/Courses";
+import { LiveCourses, NewRecordedCourse } from "@/types/Courses";
 
 export const fetchRideSchedules = async (): Promise<RideSchedule[]> => {
   try {
@@ -201,7 +201,7 @@ export const createRide = async (rideData: NewRide): Promise<RideSchedule> => {
   }
 };
 
-export const createRecordedCourse = async (courseData: Courses): Promise<Courses> => {
+export const createRecordedCourse = async (courseData: NewRecordedCourse): Promise<NewRecordedCourse> => {
     try {
       const data = await fetchAPI("/courses/courses", {   // ✅ your backend expects POST /courses
         method: "POST",
@@ -222,7 +222,7 @@ export const createRecordedCourse = async (courseData: Courses): Promise<Courses
       }
   
       // ✅ Your backend returns { course: {...} }
-      const createdCourse: Courses = data.course || data;
+      const createdCourse: NewRecordedCourse = data.course || data;
   
       if (!createdCourse || !createdCourse.id) {
         throw new Error("The backend did not return a valid object or missing ID for the created course.");
@@ -236,7 +236,7 @@ export const createRecordedCourse = async (courseData: Courses): Promise<Courses
   };
 
 
-  export const createLiveCourse = async (courseData: Courses): Promise<Courses> => {
+  export const createLiveCourse = async (courseData: LiveCourses): Promise<LiveCourses> => {
     try {
       const data = await fetchAPI("/livecourses/livecourses", {   // ✅ your backend expects POST /courses
         method: "POST",
@@ -257,7 +257,7 @@ export const createRecordedCourse = async (courseData: Courses): Promise<Courses
       }
   
       // ✅ Your backend returns { course: {...} }
-      const createdCourse: Courses = data.course || data;
+      const createdCourse: LiveCourses = data.course || data;
   
       if (!createdCourse || !createdCourse.id) {
         throw new Error("The backend did not return a valid object or missing ID for the created course.");
