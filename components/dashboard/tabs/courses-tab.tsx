@@ -1,17 +1,36 @@
 "use client"
 
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { GraduationCap, BookOpen, Brain, Target, Heart, Search, Lock } from "lucide-react"
+import { GraduationCap, BookOpen, Brain, Target, Heart, Search, Lock, Plus } from "lucide-react"
 
 import { courses } from "../data/courses-data"
+import { RecordedCourseModal } from "../modals/recorded-course-modal"
+import { SuccessAnimation } from "@/components/ui/success-animation"
+import { useAuth } from "@/contexts/AuthContext"
 
 export function CoursesTab() {
+  const [showRecordedCourseModal, setShowRecordedCourseModal] = useState(false)
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+  const { role,name } = useAuth();
+
+  const handleCourseAdded = () => {
+    setShowRecordedCourseModal(false)
+    setShowSuccessAnimation(true)
+    setTimeout(() => setShowSuccessAnimation(false), 3000)
+  }
+
   return (
     <>
+     <SuccessAnimation
+        isVisible={showSuccessAnimation}
+        message="Cours enregistré ajouté avec succès !"
+        type="course"
+      />
       <section>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -26,10 +45,19 @@ export function CoursesTab() {
                 Approfondissez vos connaissances et compétences en Médecine Traditionnelle Chinoise.
               </p>
             </div>
-            <Button className="w-fit rounded-2xl bg-white text-red-700 hover:bg-white/90">
-              <GraduationCap className="mr-2 h-4 w-4" />
-              Voir Ma Certification
-            </Button>
+            <div className="flex gap-2">
+            {role === "admin" && (
+              <Button
+                onClick={() => setShowRecordedCourseModal(true)}
+                className="w-fit rounded-2xl g-gradient-to-r from-red-600 text-white hover:bg-white/20 border border-white/20"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Nouveau Cours Enregistré
+              </Button>
+              )}
+            </div>
+
+            
           </div>
         </motion.div>
       </section>
@@ -87,6 +115,14 @@ export function CoursesTab() {
           ))}
         </div>
       </section>
+
+      <RecordedCourseModal
+        isOpen={showRecordedCourseModal}
+        onClose={() => setShowRecordedCourseModal(false)}
+        onSuccess={handleCourseAdded}
+      />
+
+     
     </>
   )
 }

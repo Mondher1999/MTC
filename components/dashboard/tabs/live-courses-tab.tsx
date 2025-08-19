@@ -1,12 +1,25 @@
 "use client"
 
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Radio, Clock, Users, Play } from "lucide-react"
+import { Radio, Clock, Users, Play, Video } from "lucide-react"
+import { LiveCourseModal } from "../modals/live-course-modal"
+import { SuccessAnimation } from "@/components/ui/success-animation"
+import { useAuth } from "@/contexts/AuthContext"
 
 export function LiveCoursesTab() {
+  const [showLiveCourseModal, setShowLiveCourseModal] = useState(false)
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
+  const { role,name } = useAuth();
+  const handleSuccess = (message: string) => {
+    setSuccessMessage(message)
+    setShowSuccessAnimation(true)
+  }
+
   const liveCourses = [
     {
       title: "Acupuncture Avancée",
@@ -34,8 +47,15 @@ export function LiveCoursesTab() {
     },
   ]
 
+  
+
   return (
     <>
+       <SuccessAnimation
+        isVisible={showSuccessAnimation}
+        onComplete={() => setShowSuccessAnimation(false)}
+        message={successMessage}
+      />
       <section>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -52,13 +72,32 @@ export function LiveCoursesTab() {
               <h2 className="text-3xl font-bold">Cours en Direct</h2>
               <p className="max-w-[600px] text-white/80">Participez aux cours en temps réel avec nos experts en MTC.</p>
             </div>
-            <Button className="w-fit rounded-2xl bg-white text-red-700 hover:bg-white/90">
-              <Play className="mr-2 h-4 w-4" />
-              Rejoindre le Cours
-            </Button>
+            <div className="flex gap-2">
+                {role === "admin" ? (
+                  <Button
+                    onClick={() => setShowLiveCourseModal(true)}
+                    className="rounded-2xl bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                    size="lg"
+                  >
+                    <Video className="mr-2 h-5 w-5" />
+                    Créer un Cours en Direct
+                  </Button>
+                ) : (
+                  <Button className="w-fit rounded-2xl bg-white text-red-700 hover:bg-white/90">
+                    <Play className="mr-2 h-4 w-4" />
+                    Rejoindre le Cours
+                  </Button>
+                )}
+              </div>
+
+  
+       
+    
           </div>
         </motion.div>
       </section>
+
+    
 
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold">Cours Disponibles Aujourd'hui</h2>
@@ -131,6 +170,14 @@ export function LiveCoursesTab() {
           ))}
         </div>
       </section>
+
+      <LiveCourseModal
+        isOpen={showLiveCourseModal}
+        onClose={() => setShowLiveCourseModal(false)}
+        onSuccess={handleSuccess}
+      />
+
+   
     </>
   )
 }

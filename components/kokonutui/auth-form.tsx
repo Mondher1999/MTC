@@ -11,6 +11,7 @@ import { faEnvelope } from "@fortawesome/free-solid-svg-icons"
 import { auth } from "@/lib/firebase"
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth"
 import { useAuth } from "../../contexts/AuthContext"
+import { useLoading } from "@/contexts/LoadingContext"
 
 export function AuthForm() {
   // --- State for the main login form ---
@@ -27,6 +28,7 @@ export function AuthForm() {
 
   const { user, loading } = useAuth()
   const router = useRouter()
+  const { startLoading } = useLoading()
 
   // --- Handlers for the main login form ---
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -41,6 +43,7 @@ export function AuthForm() {
 
     try {
       await signInWithEmailAndPassword(auth, email, motDePasse)
+      startLoading()
       router.push("/dashboard")
     } catch (error) {
       console.error("Sign-In Error:", error)
@@ -184,49 +187,54 @@ export function AuthForm() {
       </form>
 
       {/* Password Reset Modal */}
-      <Modal isOpen={isModalOpen} onClose={closeModal}>
+       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <form onSubmit={handleSendPasswordResetEmail}>
-          <div className="rounded-lg bg-white p-6 shadow-lg">
-            <h2 className="mb-4 border-b pb-3 text-2xl font-bold text-gray-800">Réinitialiser le mot de passe</h2>
-            <div className="relative mt-6">
-              <label
-                htmlFor="reset-email" // Use a unique ID
-                className="mb-2 block font-semibold text-gray-700"
-              >
+          <div className="rounded-lg bg-gray-900/95 backdrop-blur-sm border border-white/10 p-6 shadow-2xl">
+            <h2 className="mb-6 text-2xl font-bold text-gray-100 border-b border-white/10 pb-3">
+              Réinitialiser le mot de passe
+            </h2>
+
+            <div className="space-y-2">
+              <label htmlFor="reset-email" className="text-sm font-medium text-gray-100">
                 Adresse e-mail
               </label>
               <div className="relative">
-                <FontAwesomeIcon
-                  icon={faEnvelope}
-                  className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
-                />
+                <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
                 <input
                   type="email"
-                  id="reset-email" // Unique ID
+                  id="reset-email"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
                   required
-                  className="w-full rounded-lg border p-3 pl-12 text-gray-900 shadow-inner transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="h-12 w-full rounded-lg border border-transparent bg-white/5 pl-11 pr-4 text-gray-200 placeholder:text-gray-500 transition-colors duration-300 focus:border-red-500/50 focus:bg-white/10 focus:outline-none focus:ring-0"
                   placeholder="Entrez votre email de récupération"
                 />
               </div>
             </div>
 
             {/* Modal Messages */}
-            {resetError && <p className="mt-4 text-center font-semibold text-red-600">{resetError}</p>}
-            {resetSuccess && <p className="mt-4 text-center font-semibold text-green-600">{resetSuccess}</p>}
+            {resetError && (
+              <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                <p className="text-center font-medium text-red-400">{resetError}</p>
+              </div>
+            )}
+            {resetSuccess && (
+              <div className="mt-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                <p className="text-center font-medium text-green-400">{resetSuccess}</p>
+              </div>
+            )}
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex gap-3">
               <button
                 type="button"
                 onClick={closeModal}
-                className="mr-3 rounded-full px-6 py-2 font-semibold text-gray-700 transition-colors hover:bg-gray-200"
+                className="flex-1 h-12 rounded-lg border border-white/10 bg-white/5 font-medium text-gray-200 transition-all duration-300 hover:bg-white/10 hover:border-white/20"
               >
                 Annuler
               </button>
               <button
                 type="submit"
-                className="rounded-full bg-blue-600 px-6 py-2 font-semibold text-white shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:bg-blue-700 hover:shadow-lg"
+                className="flex-1 h-12 rounded-lg bg-red-600 font-bold text-white transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:bg-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.4)]"
               >
                 Envoyer
               </button>

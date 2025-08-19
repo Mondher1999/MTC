@@ -112,7 +112,7 @@ export function DashboardOverview({ onNavigateToTab }: DashboardOverviewProps) {
           ))}
         </div>
       </section>
-
+ {/*
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -192,7 +192,7 @@ export function DashboardOverview({ onNavigateToTab }: DashboardOverviewProps) {
           </div>
         </section>
       </div>
-
+*/}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold">Informations Importantes</h2>

@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 import type { User } from "firebase/auth"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth } from "@/lib/firebase"
+import { fetchUserByEmail } from "@/services/Service"
 
 interface AuthContextType {
   user: User | null
@@ -33,25 +34,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       auth,
       async (firebaseUser) => {
         if (firebaseUser) {
-          setUser(firebaseUser)
-          // For now, set default role and name to avoid API dependency issues
-          setRole("user")
-          setName(firebaseUser.displayName || firebaseUser.email || "User")
+          setUser(firebaseUser);
+          try {
+            // Fetch the user details from Firestore using the user ID
+            if (!firebaseUser.email) {
+              setError(new Error("Email not available"));
+              setLoading(false);
+              return;
+            }
+            const userData = await fetchUserByEmail(firebaseUser.email);
+            
+
+            setRole(userData.role); // Set the role based on the fetched data
+            setName(userData.name); // Set the name based on the fetched data
+          } catch (error) {
+            console.error("Error fetching user role:", error);
+            setRole(null);
+          }
         } else {
-          setUser(null)
-          setRole(null)
-          setName(null)
+          setUser(null);
+          setRole(null);
         }
-        setLoading(false)
+        setLoading(false);
       },
       (error) => {
-        setError(error)
-        setLoading(false)
-      },
-    )
+        setError(error);
+        setLoading(false);
+      }
+    );
 
-    return () => unsubscribe()
-  }, [])
+    return () => unsubscribe();
+  }, []);
 
   return <AuthContext.Provider value={{ user, loading, error, role, name }}>{children}</AuthContext.Provider>
 }

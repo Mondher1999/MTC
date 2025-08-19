@@ -3,6 +3,8 @@ import type { Metadata } from "next"
 import { Outfit } from "next/font/google"
 import "./globals.css"
 import { AuthProvider } from "../contexts/AuthContext"
+import { LoadingProvider } from "../contexts/LoadingContext"
+import { PageLoader } from "@/components/ui/page-loader"
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -25,7 +27,12 @@ export default function RootLayout({
   return (
     <html lang="fr" className={outfit.variable}>
       <body className="font-sans antialiased">
-        <AuthProvider>{children}</AuthProvider>
+        <LoadingProvider>
+          <AuthProvider>
+            {children}
+            <PageLoader />
+          </AuthProvider>
+        </LoadingProvider>
       </body>
     </html>
   )

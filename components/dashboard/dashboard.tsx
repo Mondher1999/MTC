@@ -1,26 +1,35 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Home, BookOpen, Radio, Plus, CreditCard } from "lucide-react"
+import { Home, BookOpen, Radio, Plus, CreditCard, Users } from "lucide-react"
 
 import { DashboardLayout } from "./layout/dashboard-layout"
 import { DashboardOverview } from "./tabs/dashboard-overview"
 import { CoursesTab } from "./tabs/courses-tab"
 import { LiveCoursesTab } from "./tabs/live-courses-tab"
+import { UserManagementTab } from "./tabs/user-management-tab"
+import { useAuth } from "@/contexts/AuthContext"
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard")
+  const { role,name } = useAuth();
 
+ 
+  
   return (
     <DashboardLayout>
       <main className="flex-1 p-4 md:p-6">
         <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <TabsList className="grid w-full max-w-[600px] grid-cols-3 rounded-3xl p-1">
+          <TabsList
+        className={`grid w-full max-w-[800px] rounded-3xl p-1 ${
+          role === "etudiant" ? "grid-cols-3" : "grid-cols-4"
+        }`}
+>
               <TabsTrigger
                 value="dashboard"
                 className="flex items-center gap-2 rounded-xl data-[state=active]:rounded-xl"
@@ -46,17 +55,20 @@ export function Dashboard() {
                 <span>Cours Enregistrés</span>
                 <Badge className="ml-auto">2</Badge>
               </TabsTrigger>
-            </TabsList>
-            <div className="hidden md:flex gap-2">
-              <Button variant="outline" className="rounded-2xl bg-transparent">
-                <CreditCard className="mr-2 h-4 w-4" />
-                Paiement
-              </Button>
-              <Button className="rounded-2xl">
-                <Plus className="mr-2 h-4 w-4" />
-                Nouveau Cours
-              </Button>
-            </div>
+            {/* Conditionnel : n'affiche que si le rôle n'est pas "etudiant" */}
+            {/* Conditionnel : n'affiche que si le rôle n'est pas "etudiant" */}
+            {role !== "etudiant" && (
+              <TabsTrigger
+                value="users"
+                className="flex w-full items-center gap-2 rounded-xl data-[state=active]:rounded-xl"
+              >
+                <Users className="h-4 w-4" />
+                <span>Utilisateurs</span>
+                <Badge className="ml-auto">12</Badge>
+              </TabsTrigger>
+            )}
+          </TabsList>
+          
           </div>
 
           <AnimatePresence mode="wait">
@@ -78,10 +90,16 @@ export function Dashboard() {
               <TabsContent value="courses" className="space-y-8 mt-0">
                 <CoursesTab />
               </TabsContent>
+
+              <TabsContent value="users" className="space-y-8 mt-0">
+                <UserManagementTab />
+              </TabsContent>
             </motion.div>
           </AnimatePresence>
         </Tabs>
       </main>
+
+      
     </DashboardLayout>
   )
 }

@@ -1,4 +1,4 @@
-const API_URL = "https://api-slwdtp5cqq-uc.a.run.app"; // Ensure this URL is correct
+const API_URL = "http://localhost:4002"; // ✅ ajoute le protocole
       export async function fetchAPI(
         endpoint: string,
         options: RequestInit = {} // Allow all properties of RequestInit (method, headers, body, etc.)
