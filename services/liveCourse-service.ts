@@ -1,6 +1,6 @@
 import { RideSchedule } from "../types/RideSchedule";
 import { fetchAPI } from "../lib/api";
-import { Clients, Users } from "../types/Clients";
+import { Clients, Userss } from "../types/Clients";
 import { NewRide } from "@/types/RideSchedule";
 import { LiveCourses, NewRecordedCourse } from "@/types/Courses";
 
@@ -24,31 +24,31 @@ export const fetchClient = async (): Promise<Clients[]> => {
   }
 };
 
-export const fetchUsers = async (): Promise<Users[]> => {
+export const fetchUserss = async (): Promise<Userss[]> => {
   try {
-    const data: Users[] = await fetchAPI("/users/users");
+    const data: Userss[] = await fetchAPI("/Userss/Userss");
     return data;
   } catch (error) {
-    console.error("Error fetching Users:", error);
+    console.error("Error fetching Userss:", error);
     return []; // Return an empty array to maintain the function's contract
   }
 };
 
-export const fetchUserById = async (id: string): Promise<Users> => {
+export const fetchUserssById = async (id: string): Promise<Userss> => {
   try {
-    const user: Users = await fetchAPI(
-      `/users/users/${encodeURIComponent(id)}`
+    const Userss: Userss = await fetchAPI(
+      `/Userss/Userss/${encodeURIComponent(id)}`
     );
-    return user;
+    return Userss;
   } catch (error) {
-    console.error(`Error fetching user with ID ${id}:`, error);
+    console.error(`Error fetching Userss with ID ${id}:`, error);
     throw error;
   }
 };
 
-export const deleteUserByEmail = async (email: string): Promise<void> => {
+export const deleteUserssByEmail = async (email: string): Promise<void> => {
   try {
-    const response = await fetch("https://api-slwdtp5cqq-uc.a.run.app/users/delete-driver", {
+    const response = await fetch("https://api-slwdtp5cqq-uc.a.run.app/Userss/delete-driver", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -70,14 +70,14 @@ export const deleteUserByEmail = async (email: string): Promise<void> => {
 
 
 
-export const fetchUserByEmail = async (email: string): Promise<Users> => {
+export const fetchUserssByEmail = async (email: string): Promise<Userss> => {
   try {
-    const user: Users = await fetchAPI(
-      `/users/usersByEmail/${encodeURIComponent(email)}`
+    const Userss: Userss = await fetchAPI(
+      `/Userss/UserssByEmail/${encodeURIComponent(email)}`
     );
-    return user;
+    return Userss;
   } catch (error) {
-    console.error(`Error fetching user  ${email}:`, error);
+    console.error(`Error fetching Userss  ${email}:`, error);
     throw error;
   }
 };

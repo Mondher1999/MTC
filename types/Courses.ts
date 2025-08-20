@@ -5,7 +5,10 @@ export interface LiveCourses {
   meetingLink: string;
   instructorName: string;
   date: string;
-  time: string;
+  startTime: string;
+  endTime: string;
+  startTimeChina?: string;
+  endTimeChina?: string;
   selectedStudents: string[];  
 }
 

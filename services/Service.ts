@@ -1,6 +1,6 @@
 import { RideSchedule } from "../types/RideSchedule";
 import { fetchAPI } from "../lib/api";
-import { Clients, Users } from "../types/Clients";
+import { Clients, Userss } from "../types/Clients";
 import { NewRide } from "@/types/RideSchedule";
 
 export const fetchRideSchedules = async (): Promise<RideSchedule[]> => {
@@ -23,31 +23,73 @@ export const fetchClient = async (): Promise<Clients[]> => {
   }
 };
 
-export const fetchUsers = async (): Promise<Users[]> => {
+// 1️⃣ Get verified students
+export const fetchStudentsVerified = async (): Promise<Userss[]> => {
   try {
-    const data: Users[] = await fetchAPI("/users/users");
+    const data = await fetchAPI("/auth/students-verified", {
+      method: "GET",
+    });
+    return data.students || [];
+  } catch (error) {
+    console.error("Error fetching verified students:", error);
+    return [];
+  }
+};
+
+
+
+
+// 2️⃣ Get all teachers
+export const fetchTeachers = async (): Promise<Userss[]> => {
+  try {
+    const data = await fetchAPI("/auth/teachers", {
+      method: "GET",
+    });
+    return data.teachers || [];
+  } catch (error) {
+    console.error("Error fetching teachers:", error);
+    return [];
+  }
+};
+
+// 3️⃣ Validate a Userss (admin only)
+export const validateUserss = async (UserssId: string): Promise<Userss | null> => {
+  try {
+    const data = await fetchAPI(`/auth/validate-Users/${UserssId}`, {
+      method: "PATCH",
+    });
+    return data.Userss || null;
+  } catch (error) {
+    console.error(`Error validating Userss ${UserssId}:`, error);
+    return null;
+  }
+};
+
+export const fetchUsers = async (): Promise<Userss[]> => {
+  try {
+    const data: Userss[] = await fetchAPI("/Usersss/Usersss");
     return data;
   } catch (error) {
-    console.error("Error fetching Users:", error);
+    console.error("Error fetching Usersss:", error);
     return []; // Return an empty array to maintain the function's contract
   }
 };
 
-export const fetchUserById = async (id: string): Promise<Users> => {
+export const fetchUserssById = async (id: string): Promise<Userss> => {
   try {
-    const user: Users = await fetchAPI(
-      `/users/users/${encodeURIComponent(id)}`
+    const Userss: Userss = await fetchAPI(
+      `/Usersss/Usersss/${encodeURIComponent(id)}`
     );
-    return user;
+    return Userss;
   } catch (error) {
-    console.error(`Error fetching user with ID ${id}:`, error);
+    console.error(`Error fetching Userss with ID ${id}:`, error);
     throw error;
   }
 };
 
-export const deleteUserByEmail = async (email: string): Promise<void> => {
+export const deleteUserssByEmail = async (email: string): Promise<void> => {
   try {
-    const response = await fetch("https://api-slwdtp5cqq-uc.a.run.app/users/delete-driver", {
+    const response = await fetch("https://api-slwdtp5cqq-uc.a.run.app/Usersss/delete-driver", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -69,14 +111,14 @@ export const deleteUserByEmail = async (email: string): Promise<void> => {
 
 
 
-export const fetchUserByEmail = async (email: string): Promise<Users> => {
+export const fetchUserssByEmail = async (email: string): Promise<Userss> => {
   try {
-    const user: Users = await fetchAPI(
-      `/users/usersByEmail/${encodeURIComponent(email)}`
+    const Userss: Userss = await fetchAPI(
+      `/Usersss/UsersssByEmail/${encodeURIComponent(email)}`
     );
-    return user;
+    return Userss;
   } catch (error) {
-    console.error(`Error fetching user  ${email}:`, error);
+    console.error(`Error fetching Userss  ${email}:`, error);
     throw error;
   }
 };
@@ -165,121 +207,41 @@ export const updateRide = async (
   }
 };
 
-export const createRide = async (rideData: NewRide): Promise<RideSchedule> => {
-  try {
-    // Assuming fetchAPI returns the parsed JSON data directly
-    const data = await fetchAPI("/ride/rides/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(rideData),
-    });
-
-    // Check if data contains an error
-    if (!data) {
-      throw new Error("No response from server.");
-    }
-
-    if (data.error) {
-      throw new Error(`Failed to create ride: ${data.error}`);
-    }
-
-    const createdRide: RideSchedule = data.ride || data;
-
-    if (!createdRide || !createdRide.id) {
-      throw new Error(
-        "The backend did not return a valid object or missing ID for the created ride."
-      );
-    }
-
-    return createdRide;
-  } catch (error) {
-    console.error("Error creating new ride:", error);
-    throw error;
+const translateError = (message: string) => {
+  switch (message) {
+    case "firstName, lastName and email are required":
+      return "Le prénom, le nom et l'email sont obligatoires.";
+    case "Email already in use":
+      return "Cet email est déjà utilisé.";
+    case "Registration failed":
+      return "Échec de la création du compte. Veuillez réessayer.";
+    default:
+      return message; // si le backend renvoie déjà un message personnalisé
   }
 };
 
-export const createClient = async (clientData: Clients): Promise<Clients> => {
+
+export const createUser = async (UserssData: Userss): Promise<Userss> => {
   try {
-    const data = await fetchAPI("/customer/customers/", {
+    const data = await fetchAPI("/auth/register", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(clientData),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(UserssData),
     });
 
-    console.log("Backend response for createClient:", data);
-
-    if (!data) {
-      throw new Error("No response from server.");
-    }
-
-    if (data.error) {
-      throw new Error(`Failed to create client: ${data.error}`);
-    }
-
-    // Adjusted to extract the client from 'data.customer'
-    const createdClient: Clients = data.customer || data;
-
-    if (!createdClient || !createdClient.id) {
-      throw new Error(
-        "The backend did not return a valid object or missing ID for the created client."
-      );
-    }
-
-    return createdClient;
-  } catch (error) {
-    console.error("Error creating new client:", error);
-    throw error;
+    return data.Userss || data;
+  } catch (err: any) {
+    const translated = translateError(err.message);
+    console.error("Erreur création utilisateur:", translated);
+    throw new Error(translated);
   }
 };
 
-export const createUser = async (userData: Users): Promise<Users> => {
+
+
+export const DeleteUserss = async (UserssId: string): Promise<void> => {
   try {
-    const data = await fetchAPI("/users/user/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData),
-    });
-
-    console.log("Backend response for createUser:", data);
-
-    if (!data) {
-      throw new Error("No response from server.");
-    }
-
-    if (data.error) {
-      throw new Error(`Failed to create User: ${data.error}`);
-    }
-
-    // If the backend returns a 'user' object, use that, otherwise assume the whole response is the user
-    const createUser: Users = data.user || data;
-
-    // Check if a valid user object was returned
-    if (!createUser) {
-      throw new Error("The backend did not return a valid user object.");
-    }
-
-    // Optional: Check if the 'id' is present, if it's crucial for your business logic
-    if (!createUser.id) {
-      console.warn("User created without an ID. This might be an issue.");
-    }
-
-    // Return the created user
-    return createUser;
-  } catch (error) {
-    console.error("Error creating new user:", error);
-    throw error;
-  }
-};
-
-export const DeleteUser = async (userId: string): Promise<void> => {
-  try {
-    await fetchAPI(`/users/users/${encodeURIComponent(userId)}`, {
+    await fetchAPI(`/Usersss/Usersss/${encodeURIComponent(UserssId)}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -287,8 +249,8 @@ export const DeleteUser = async (userId: string): Promise<void> => {
       },
     });
   } catch (error) {
-    console.error(`Error deleting user with ID ${userId}:`, error);
-    throw new Error("Failed to delete the user.");
+    console.error(`Error deleting Userss with ID ${UserssId}:`, error);
+    throw new Error("Failed to delete the Userss.");
   }
 };
 

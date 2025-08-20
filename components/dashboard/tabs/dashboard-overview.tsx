@@ -37,7 +37,7 @@ export function DashboardOverview({ onNavigateToTab }: DashboardOverviewProps) {
                 l'Université de Shanghai.
               </p>
               <div className="flex flex-wrap gap-3">
-                <Button className="rounded-2xl bg-white text-primary hover:bg-white/90">Continuer la Formation</Button>
+                <Button  className="rounded-2xl bg-white text-primary hover:bg-white/90" onClick={() => onNavigateToTab("courses")}>Continuer la Formation</Button>
                 <Button
                   variant="outline"
                   className="rounded-2xl bg-transparent border-white text-white hover:bg-white/10"

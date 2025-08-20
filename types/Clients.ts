@@ -11,10 +11,15 @@ export interface Clients {
   clientTel: string;
 }
 
-export interface Users {
-  id: string;
+export interface Userss {
+  id:string;
   role: string;
-  name: string;
+  firstName: string;
+  lastName:string;
+  telNumber:string;
   email: string;
-  password: string;
+  formValidated?:string;
+  accessValidated?:string;
+
+
 }

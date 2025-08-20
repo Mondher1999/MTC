@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +13,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Video, Clock, User, BookOpen, Users, Plus, Calendar, Target } from "lucide-react"
 import { createRecordedCourse } from "@/services/liveCourse-service"
+import { Loader2 } from "lucide-react"
+import { Userss } from "@/types/Clients"
+import { fetchStudentsVerified, fetchTeachers } from "@/services/Service"
 
 interface RecordedCourseModalProps {
   isOpen: boolean
@@ -21,31 +24,57 @@ interface RecordedCourseModalProps {
 }
 
 export function RecordedCourseModal({ isOpen, onClose, onSuccess }: RecordedCourseModalProps) {
+  const [loading, setLoading] = useState(false)
+const [error, setError] = useState<string | null>(null)
+const [students, setStudents] = useState<Userss[]>([]);
+const [teachers, setTeachers] = useState<Userss[]>([]);
+
+
+
   const [formData, setFormData] = useState({
     courseName: "",
     description: "",
     videoLink: "",
     instructorName: "",
     duration: "",
+    instructorId:"",
     category: "",
     recordingDate: "",
     selectedStudents: [] as string[],
   })
 
-  const instructors = [
-    { id: "1", name: "Dr. Zhang Ming" },
-    { id: "2", name: "Dr. Wang Hua" },
-    { id: "3", name: "Dr. Li Wei" },
-    { id: "4", name: "Dr. Chen Lu" },
-  ]
 
-  const students = [
-    { id: "1", name: "Marie Dubois" },
-    { id: "2", name: "Jean Martin" },
-    { id: "3", name: "Sophie Laurent" },
-    { id: "4", name: "Pierre Moreau" },
-    { id: "5", name: "Emma Bernard" },
-  ]
+    // ✅ Fetch verified students when modal opens
+    useEffect(() => {
+      if (isOpen) {
+        const loadStudents = async () => {
+          try {
+            const verified = await fetchStudentsVerified();
+            setStudents(verified);
+          } catch (err) {
+            console.error("Erreur lors du chargement des étudiants:", err);
+            setError("Impossible de charger les étudiants vérifiés.");
+          }
+        };
+        loadStudents();
+      }
+    }, [isOpen]);
+  
+    useEffect(() => {
+      if (isOpen) {
+        const loadteachers = async () => {
+          try {
+            const verified = await fetchTeachers();
+            setTeachers(verified);
+          } catch (err) {
+            console.error("Erreur lors du chargement des étudiants:", err);
+            setError("Impossible de charger les étudiants vérifiés.");
+          }
+        };
+        loadteachers();
+      }
+    }, [isOpen]);
+
 
   const categories = [
     { id: "theory", name: "Théorie" },
@@ -61,6 +90,8 @@ export function RecordedCourseModal({ isOpen, onClose, onSuccess }: RecordedCour
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+    setLoading(true)
   
     try {
       const created = await createRecordedCourse(formData)
@@ -69,6 +100,7 @@ export function RecordedCourseModal({ isOpen, onClose, onSuccess }: RecordedCour
       setFormData({
         courseName: "",
         description: "",
+        instructorId: "",
         videoLink: "",
         instructorName: "",
         duration: "",
@@ -78,10 +110,12 @@ export function RecordedCourseModal({ isOpen, onClose, onSuccess }: RecordedCour
       })
   
       onClose()
-      onSuccess(`Le cours enregistré "${created.courseName}" a été ajouté avec succès !`)
-    } catch (error: any) {
-      console.error("Error creating recorded course:", error)
-      onSuccess(`❌ Erreur: ${error.message}`)
+      onSuccess(`Le cours en enregistrer "${created.courseName}" a été créé avec succès !`)
+    } catch (err: any) {
+      console.error("Error creating course:", err)
+      setError(err.message || "Une erreur est survenue lors de la création du cours.")
+    } finally {
+      setLoading(false)
     }
   }
   
@@ -129,28 +163,35 @@ export function RecordedCourseModal({ isOpen, onClose, onSuccess }: RecordedCour
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="instructor" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Enseignant
-                </Label>
-                <Select
-                  value={formData.instructorName}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, instructorName: value }))
-                  }
-                >
-                  <SelectTrigger className="rounded-xl">
-                    <SelectValue placeholder="Sélectionner un enseignant" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {instructors.map((instructor) => (
-                      <SelectItem key={instructor.id} value={instructor.name}>
-                        {instructor.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Label htmlFor="instructor" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Enseignant
+              </Label>
+              <Select
+                value={formData.instructorId} // ✅ use the id, not the name
+                onValueChange={(value) => {
+                  const selected = teachers.find((t) => t.id === value);
+                  setFormData((prev) => ({
+                    ...prev,
+                    instructorId: value,
+                    instructorName: selected
+                      ? `${selected.firstName} ${selected.lastName}` // combine first + last
+                      : "",
+                  }));
+                }}
+              >
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Sélectionner un enseignant" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teachers.map((instructor) => (
+                    <SelectItem key={instructor.id} value={instructor.id}>
+                      {instructor.firstName} {instructor.lastName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -245,62 +286,71 @@ export function RecordedCourseModal({ isOpen, onClose, onSuccess }: RecordedCour
           </div>
 
           <div className="space-y-3">
-  <Label className="flex items-center gap-2">
-    <Users className="h-4 w-4" />
-    Étudiants ayant accès
-  </Label>
+          <Label className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Étudiants ayant accès
+            </Label>
 
-          {/* Bouton Select All / Unselect All */}
-          <div className="flex justify-end mb-2">
-            <button
-              type="button"
-              onClick={() => {
-                if (formData.selectedStudents.length === students.length) {
-                  // 🔹 Si tous sont déjà sélectionnés → on vide
-                  setFormData((prev) => ({ ...prev, selectedStudents: [] }));
-                } else {
-                  // 🔹 Sinon → on sélectionne tous
-                  setFormData((prev) => ({
-                    ...prev,
-                    selectedStudents: students.map((s) => s.id),
-                  }));
-                }
-              }}
-              className="px-3 py-1 text-sm rounded-lg bg-red-100 hover:bg-red-200 text-red-700"
-            >
-              {formData.selectedStudents.length === students.length
-                ? "Tout désélectionner"
-                : "Sélectionner tous"}
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 p-4 bg-red-50/50 rounded-xl border border-red-200">
-            {students.map((student) => (
-              <div key={student.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={student.id}
-                  checked={formData.selectedStudents.includes(student.id)}
-                  onCheckedChange={(checked) =>
-                    handleStudentSelection(student.id, checked as boolean)
+            <div className="flex justify-end mb-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (formData.selectedStudents.length === students.length) {
+                    setFormData((prev) => ({ ...prev, selectedStudents: [] }));
+                  } else {
+                    setFormData((prev) => ({
+                      ...prev,
+                      selectedStudents: students.map((s) => s.id),
+                    }));
                   }
-                />
-                <Label
-                  htmlFor={student.id}
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  {student.name}
-                </Label>
-              </div>
-            ))}
+                }}
+                className="px-3 py-1 text-sm rounded-lg bg-red-100 hover:bg-red-200 text-red-700"
+              >
+                {formData.selectedStudents.length === students.length
+                  ? "Tout désélectionner"
+                  : "Sélectionner tous"}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 p-4 bg-red-50/50 rounded-xl border border-red-200">
+              {students.map((student) => (
+                <div key={student.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={student.id}
+                    checked={formData.selectedStudents.includes(student.id)}
+                    onCheckedChange={(checked) =>
+                      handleStudentSelection(student.id, checked as boolean)
+                    }
+                  />
+                  <Label htmlFor={student.id} className="text-sm font-medium cursor-pointer">
+                  {student.firstName} {student.lastName}  
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
+          {error && (
+        <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-center">
+          {error}
         </div>
+          )}
 
 
           <div className="flex gap-3 pt-4">
-            <Button type="submit" className="rounded-2xl bg-orange-600 hover:bg-orange-700 flex-1">
-              <Plus className="mr-2 h-4 w-4" />
-              Ajouter le Cours Enregistré
-            </Button>
+            
+        <Button
+          type="submit"
+          disabled={loading}
+          className="rounded-2xl bg-orange-600 hover:bg-orange-700 flex-1 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+        >
+          {loading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Plus className="mr-2 h-4 w-4" />
+          )}
+          {loading ? "Création en cours..." : "Ajouter le Cours Enregistré"}
+        </Button>
+
             <Button type="button" variant="outline" onClick={onClose} className="rounded-2xl bg-transparent">
               Annuler
             </Button>

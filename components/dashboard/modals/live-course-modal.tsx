@@ -2,7 +2,8 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +14,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Calendar, Clock, Link, Lock, User, BookOpen, Users, Plus } from "lucide-react"
 import {  createLiveCourse } from "@/services/liveCourse-service"
+import {  Loader2 } from "lucide-react"
+import {  Userss } from "../../../types/Clients";
+import { fetchStudentsVerified, fetchTeachers } from "@/services/Service"
 
 interface LiveCourseModalProps {
   isOpen: boolean
@@ -20,14 +24,24 @@ interface LiveCourseModalProps {
   onSuccess: (message: string) => void
 }
 
+
 export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalProps) {
+  
+const [loading, setLoading] = useState(false)
+const [error, setError] = useState<string | null>(null)
+const [students, setStudents] = useState<Userss[]>([]);
+const [teachers, setTeachers] = useState<Userss[]>([]);
+
   const [formData, setFormData] = useState({
     courseName: "",
+    instructorId: "",
     description: "",
     meetingLink: "",
     instructorName: "",
-    date: "",
-    time: "",
+    date:"",
+    startTime: "",
+    endTime: "",
+  
     selectedStudents: [] as string[],
   })
 
@@ -38,13 +52,38 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
     { id: "4", name: "Dr. Chen Lu" },
   ]
 
-  const students = [
-    { id: "1", name: "Marie Dubois" },
-    { id: "2", name: "Jean Martin" },
-    { id: "3", name: "Sophie Laurent" },
-    { id: "4", name: "Pierre Moreau" },
-    { id: "5", name: "Emma Bernard" },
-  ]
+
+  // ✅ Fetch verified students when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const loadStudents = async () => {
+        try {
+          const verified = await fetchStudentsVerified();
+          setStudents(verified);
+        } catch (err) {
+          console.error("Erreur lors du chargement des étudiants:", err);
+          setError("Impossible de charger les étudiants vérifiés.");
+        }
+      };
+      loadStudents();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const loadteachers = async () => {
+        try {
+          const verified = await fetchTeachers();
+          setTeachers(verified);
+        } catch (err) {
+          console.error("Erreur lors du chargement des étudiants:", err);
+          setError("Impossible de charger les étudiants vérifiés.");
+        }
+      };
+      loadteachers();
+    }
+  }, [isOpen]);
+
 
   function extractFirstLink(text: string): string {
     const regex = /(https?:\/\/[^\s]+)/;
@@ -52,30 +91,41 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
     return match ? match[0] : text; // fallback: keep raw text if no link found
   }
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
   
     try {
-      const created = await createLiveCourse(formData);
+      // Simuler un délai pour voir le loading
+      await new Promise((resolve) => setTimeout(resolve, 1000))
   
-      // Reset form
+      const created = await createLiveCourse(formData)
+  
       setFormData({
         courseName: "",
         description: "",
+        instructorId:"",
         meetingLink: "",
-        instructorName  : "",
+        instructorName: "",
         date: "",
-        time: "",
+        startTime: "",
+        endTime: "",
         selectedStudents: [],
-      });
+      })
   
-      onClose();
-      onSuccess(`Le cours en direct "${created.courseName}" a été créé avec succès !`);
-    } catch (error: any) {
-      console.error("Error creating course:", error);
-      onSuccess(`❌ Erreur: ${error.message}`);
+      onClose()
+      onSuccess(`Le cours en direct "${created.courseName}" a été créé avec succès !`)
+    } catch (err: any) {
+      console.error("Error creating course:", err)
+      setError(err.message || "Une erreur est survenue lors de la création du cours.")
+    } finally {
+      setLoading(false)
     }
-  };
+  }
+  
   
 
   const handleStudentSelection = (studentId: string, checked: boolean) => {
@@ -121,39 +171,48 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
             </div>
 
             <div className="space-y-2">
-                    <Label htmlFor="instructor" className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        Enseignant
-                      </Label>
-                      <Select
-                        value={formData.instructorName}
-                        onValueChange={(value) =>
-                          setFormData((prev) => ({ ...prev, instructorName: value }))
-                        }
-                      >
-                        <SelectTrigger className="rounded-xl">
-                          <SelectValue placeholder="Sélectionner un enseignant" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {instructors.map((instructor) => (
-                            <SelectItem key={instructor.id} value={instructor.name}>
-                              {instructor.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+              <Label htmlFor="instructor" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Enseignant
+              </Label>
+              <Select
+                value={formData.instructorId} // ✅ use the id, not the name
+                onValueChange={(value) => {
+                  const selected = teachers.find((t) => t.id === value);
+                  setFormData((prev) => ({
+                    ...prev,
+                    instructorId: value,
+                    instructorName: selected
+                      ? `${selected.firstName} ${selected.lastName}` // combine first + last
+                      : "",
+                  }));
+                }}
+              >
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Sélectionner un enseignant" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teachers.map((instructor) => (
+                    <SelectItem key={instructor.id} value={instructor.id}>
+                      {instructor.firstName} {instructor.lastName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+
 
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">Description du cours</Label>
-            <Textarea
+            <Input
               id="description"
               value={formData.description}
               onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
               placeholder="Décrivez le contenu et les objectifs du cours..."
-              className="rounded-xl min-h-[100px]"
+           
               required
             />
           </div>
@@ -185,7 +244,39 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
+          <div className="space-y-2">
+            <Label htmlFor="startTime" className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Heure de début
+            </Label>
+            <Input
+              id="startTime"
+              type="time"
+              value={formData.startTime}
+              onChange={(e) => setFormData((prev) => ({ ...prev, startTime: e.target.value }))}
+              className="rounded-xl w-full"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="endTime" className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Heure de fin
+            </Label>
+            <Input
+              id="endTime"
+              type="time"
+              value={formData.endTime}
+              onChange={(e) => setFormData((prev) => ({ ...prev, endTime: e.target.value }))}
+              className="rounded-xl w-full"
+              required
+            />
+          </div>
+        </div>
+
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
               <Label htmlFor="date" className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 Date
@@ -199,39 +290,22 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
                 required
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="time" className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Heure
-              </Label>
-              <Input
-                id="time"
-                type="time"
-                value={formData.time}
-                onChange={(e) => setFormData((prev) => ({ ...prev, time: e.target.value }))}
-                className="rounded-xl"
-                required
-              />
             </div>
-          </div>
+        
 
-          <div className="space-y-3">
-  <Label className="flex items-center gap-2">
-    <Users className="h-4 w-4" />
-    Étudiants ayant accès
-  </Label>
+            <div className="space-y-3">
+            <Label className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Étudiants ayant accès
+            </Label>
 
-  {/* Bouton Select All / Unselect All */}
             <div className="flex justify-end mb-2">
               <button
                 type="button"
                 onClick={() => {
                   if (formData.selectedStudents.length === students.length) {
-                    // 🔹 Si tous sont déjà sélectionnés → on vide
                     setFormData((prev) => ({ ...prev, selectedStudents: [] }));
                   } else {
-                    // 🔹 Sinon → on sélectionne tous
                     setFormData((prev) => ({
                       ...prev,
                       selectedStudents: students.map((s) => s.id),
@@ -256,23 +330,33 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
                       handleStudentSelection(student.id, checked as boolean)
                     }
                   />
-                  <Label
-                    htmlFor={student.id}
-                    className="text-sm font-medium cursor-pointer"
-                  >
-                    {student.name}
+                  <Label htmlFor={student.id} className="text-sm font-medium cursor-pointer">
+                  {student.firstName} {student.lastName}  
                   </Label>
                 </div>
               ))}
             </div>
           </div>
-
+          {error && (
+        <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-center">
+          {error}
+        </div>
+          )}
 
           <div className="flex gap-3 pt-4">
-            <Button type="submit" className="rounded-2xl bg-red-600 hover:bg-red-700 flex-1">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="rounded-2xl bg-red-600 hover:bg-red-700 flex-1 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+          >
+            {loading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
               <Plus className="mr-2 h-4 w-4" />
-              Créer le Cours en Direct
-            </Button>
+            )}
+            {loading ? "Création en cours..." : "Créer le Cours en Direct"}
+          </Button>
+
             <Button type="button" variant="outline" onClick={onClose} className="rounded-2xl bg-transparent">
               Annuler
             </Button>
