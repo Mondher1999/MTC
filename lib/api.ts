@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:4002"; // ✅ ajoute le protocole
+const API_URL = "http://43.154.65.148/api"; // ✅ ajoute le protocole
       export async function fetchAPI(
         endpoint: string,
         options: RequestInit = {} // Allow all properties of RequestInit (method, headers, body, etc.)
