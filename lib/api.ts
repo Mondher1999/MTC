@@ -1,9 +1,13 @@
-const API_URL = "http://43.154.65.148/api"; // ✅ ajoute le protocole
+const API_BASE =
+  process.env.NODE_ENV === "production"
+    ? "/api" // production → nginx forwards to backend
+    : "http://localhost:4002"; // local dev → direct backend
+    
       export async function fetchAPI(
         endpoint: string,
         options: RequestInit = {} // Allow all properties of RequestInit (method, headers, body, etc.)
       ) {
-        const url = `${API_URL}${endpoint}`;
+        const url = `${API_BASE}${endpoint}`;
 
         const response = await fetch(url, options); // Use the passed options
 

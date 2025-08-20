@@ -1,9 +1,12 @@
 import axios from "axios";
 
-const API_URL = "http://43.154.65.148/api";
+const API_BASE =
+  process.env.NODE_ENV === "production"
+    ? "/api" // production → nginx forwards to backend
+    : "http://localhost:4002"; // local dev → direct backend
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE,
   withCredentials: true,
 });
 
@@ -14,7 +17,7 @@ const refreshTokenRequest = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
     if (!refreshToken) throw new Error("No refresh token available");
   
-    const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
+    const response = await axios.post(`${API_BASE}/auth/refresh`, { refreshToken });
     const { accessToken, refreshToken: newRefreshToken } = response.data.tokens;
   
     localStorage.setItem("accessToken", accessToken);
