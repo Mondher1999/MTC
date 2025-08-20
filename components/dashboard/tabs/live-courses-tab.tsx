@@ -14,7 +14,7 @@ export function LiveCoursesTab() {
   const [showLiveCourseModal, setShowLiveCourseModal] = useState(false)
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
-  const { role,name } = useAuth();
+  const { user } = useAuth();
   const handleSuccess = (message: string) => {
     setSuccessMessage(message)
     setShowSuccessAnimation(true)
@@ -73,7 +73,7 @@ export function LiveCoursesTab() {
               <p className="max-w-[600px] text-white/80">Participez aux cours en temps réel avec nos experts en MTC.</p>
             </div>
             <div className="flex gap-2">
-                {role === "admin" ? (
+                {user?.role === "admin" ? (
                   <Button
                     onClick={() => setShowLiveCourseModal(true)}
                     className="rounded-2xl bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"

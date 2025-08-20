@@ -25,8 +25,7 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
     courseName: "",
     description: "",
     meetingLink: "",
-    password: "",
-    instructor: "",
+    instructorName: "",
     date: "",
     time: "",
     selectedStudents: [] as string[],
@@ -47,7 +46,11 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
     { id: "5", name: "Emma Bernard" },
   ]
 
-  
+  function extractFirstLink(text: string): string {
+    const regex = /(https?:\/\/[^\s]+)/;
+    const match = text.match(regex);
+    return match ? match[0] : text; // fallback: keep raw text if no link found
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,8 +63,7 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
         courseName: "",
         description: "",
         meetingLink: "",
-        password: "",
-        instructor: "",
+        instructorName  : "",
         date: "",
         time: "",
         selectedStudents: [],
@@ -119,26 +121,29 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="instructor" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Enseignant
-              </Label>
-              <Select
-                value={formData.instructor}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, instructor: value }))}
-              >
-                <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder="Sélectionner un enseignant" />
-                </SelectTrigger>
-                <SelectContent>
-                  {instructors.map((instructor) => (
-                    <SelectItem key={instructor.id} value={instructor.id}>
-                      {instructor.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                    <Label htmlFor="instructor" className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Enseignant
+                      </Label>
+                      <Select
+                        value={formData.instructorName}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({ ...prev, instructorName: value }))
+                        }
+                      >
+                        <SelectTrigger className="rounded-xl">
+                          <SelectValue placeholder="Sélectionner un enseignant" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {instructors.map((instructor) => (
+                            <SelectItem key={instructor.id} value={instructor.name}>
+                              {instructor.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
           </div>
 
           <div className="space-y-2">
@@ -153,7 +158,7 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
             <div className="space-y-2">
               <Label htmlFor="meetingLink" className="flex items-center gap-2">
                 <Link className="h-4 w-4" />
@@ -163,26 +168,20 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
                 id="meetingLink"
                 type="url"
                 value={formData.meetingLink}
-                onChange={(e) => setFormData((prev) => ({ ...prev, meetingLink: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    meetingLink: extractFirstLink(e.target.value),
+                  }))
+                }
+                
                 placeholder="https://zoom.us/j/..."
                 className="rounded-xl"
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="flex items-center gap-2">
-                <Lock className="h-4 w-4" />
-                Mot de passe
-              </Label>
-              <Input
-                id="password"
-                value={formData.password}
-                onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
-                placeholder="Mot de passe de la réunion"
-                className="rounded-xl"
-              />
-            </div>
+           
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,25 +217,56 @@ export function LiveCourseModal({ isOpen, onClose, onSuccess }: LiveCourseModalP
           </div>
 
           <div className="space-y-3">
-            <Label className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Étudiants concernés
-            </Label>
+  <Label className="flex items-center gap-2">
+    <Users className="h-4 w-4" />
+    Étudiants ayant accès
+  </Label>
+
+  {/* Bouton Select All / Unselect All */}
+            <div className="flex justify-end mb-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (formData.selectedStudents.length === students.length) {
+                    // 🔹 Si tous sont déjà sélectionnés → on vide
+                    setFormData((prev) => ({ ...prev, selectedStudents: [] }));
+                  } else {
+                    // 🔹 Sinon → on sélectionne tous
+                    setFormData((prev) => ({
+                      ...prev,
+                      selectedStudents: students.map((s) => s.id),
+                    }));
+                  }
+                }}
+                className="px-3 py-1 text-sm rounded-lg bg-red-100 hover:bg-red-200 text-red-700"
+              >
+                {formData.selectedStudents.length === students.length
+                  ? "Tout désélectionner"
+                  : "Sélectionner tous"}
+              </button>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 p-4 bg-red-50/50 rounded-xl border border-red-200">
               {students.map((student) => (
                 <div key={student.id} className="flex items-center space-x-2">
                   <Checkbox
                     id={student.id}
                     checked={formData.selectedStudents.includes(student.id)}
-                    onCheckedChange={(checked) => handleStudentSelection(student.id, checked as boolean)}
+                    onCheckedChange={(checked) =>
+                      handleStudentSelection(student.id, checked as boolean)
+                    }
                   />
-                  <Label htmlFor={student.id} className="text-sm font-medium cursor-pointer">
+                  <Label
+                    htmlFor={student.id}
+                    className="text-sm font-medium cursor-pointer"
+                  >
                     {student.name}
                   </Label>
                 </div>
               ))}
             </div>
           </div>
+
 
           <div className="flex gap-3 pt-4">
             <Button type="submit" className="rounded-2xl bg-red-600 hover:bg-red-700 flex-1">

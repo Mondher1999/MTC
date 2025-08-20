@@ -156,7 +156,7 @@ const { login } = useAuth()
           
           className="relative h-12 w-full overflow-hidden rounded-lg bg-red-600 font-bold text-white transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:bg-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] disabled:cursor-not-allowed disabled:bg-red-800"
         >
-          
+          Se connecter
         </button>
       </form>
 

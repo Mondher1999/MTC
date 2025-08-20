@@ -1,25 +1,23 @@
 export interface LiveCourses {
-  id?: string;  
+    
   courseName: string;
   description: string;
   meetingLink: string;
-  password: string;
-  instructor: string;
+  instructorName: string;
   date: string;
   time: string;
   selectedStudents: string[];  
 }
 
 export interface NewRecordedCourse {
-  id?: string; 
-  courseName: string
-  description: string
-  videoLink: string
-  instructor: string
-  duration: string
-  category: string
-  recordingDate: string
-  selectedStudents: string[]
+  courseName: String,
+  description: String,
+  videoLink: String,
+  instructorName: String,
+  duration: String,
+  category  : String,
+  recordingDate: String,
+  selectedStudents:  string[];
 }
 
 

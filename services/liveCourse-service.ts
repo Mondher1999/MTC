@@ -224,7 +224,7 @@ export const createRecordedCourse = async (courseData: NewRecordedCourse): Promi
       // ✅ Your backend returns { course: {...} }
       const createdCourse: NewRecordedCourse = data.course || data;
   
-      if (!createdCourse || !createdCourse.id) {
+      if (!createdCourse ) {
         throw new Error("The backend did not return a valid object or missing ID for the created course.");
       }
   
@@ -259,7 +259,7 @@ export const createRecordedCourse = async (courseData: NewRecordedCourse): Promi
       // ✅ Your backend returns { course: {...} }
       const createdCourse: LiveCourses = data.course || data;
   
-      if (!createdCourse || !createdCourse.id) {
+      if (!createdCourse ) {
         throw new Error("The backend did not return a valid object or missing ID for the created course.");
       }
   
