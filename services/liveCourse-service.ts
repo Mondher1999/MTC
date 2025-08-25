@@ -4,6 +4,12 @@ import { Clients, Userss } from "../types/Clients";
 import { NewRide } from "@/types/RideSchedule";
 import { LiveCourses, NewRecordedCourse } from "@/types/Courses";
 
+
+const API_BASE =
+  process.env.NODE_ENV === "production"
+    ? "/api" // production → nginx forwards to backend
+    : "http://localhost:4002"; // local dev → direct backend
+
 export const fetchRideSchedules = async (): Promise<RideSchedule[]> => {
   try {
     const data: RideSchedule[] = await fetchAPI("/ride/rides/");
@@ -24,9 +30,19 @@ export const fetchClient = async (): Promise<Clients[]> => {
   }
 };
 
-export const fetchUserss = async (): Promise<Userss[]> => {
+export const fetchLiveCourses = async (): Promise<LiveCourses[]> => {
   try {
-    const data: Userss[] = await fetchAPI("/Userss/Userss");
+    const data: LiveCourses[] = await fetchAPI("/livecourses/livecourses");
+    return data;
+  } catch (error) {
+    console.error("Error fetching Userss:", error);
+    return []; // Return an empty array to maintain the function's contract
+  }
+};
+
+export const fetchCourses = async (): Promise<NewRecordedCourse[]> => {
+  try {
+    const data: NewRecordedCourse[] = await fetchAPI("/courses/courses");
     return data;
   } catch (error) {
     console.error("Error fetching Userss:", error);
@@ -201,40 +217,88 @@ export const createRide = async (rideData: NewRide): Promise<RideSchedule> => {
   }
 };
 
-export const createRecordedCourse = async (courseData: NewRecordedCourse): Promise<NewRecordedCourse> => {
-    try {
-      const data = await fetchAPI("/courses/courses", {   // ✅ your backend expects POST /courses
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(courseData),
-      });
-  
-      console.log("Backend response for create course:", data);
-  
-      if (!data) {
-        throw new Error("No response from server.");
-      }
-  
-      if (data.error) {
-        throw new Error(`Failed to create course: ${data.error}`);
-      }
-  
-      // ✅ Your backend returns { course: {...} }
-      const createdCourse: NewRecordedCourse = data.course || data;
-  
-      if (!createdCourse ) {
-        throw new Error("The backend did not return a valid object or missing ID for the created course.");
-      }
-  
-      return createdCourse;   // ✅ return the object, not the function
-    } catch (error) {
-      console.error("Error creating new course:", error);
-      throw error;
-    }
-  };
+// Option 1: Accept FormData directly (Recommended for file uploads)
 
+export const createRecordedCourse = async (formData: FormData): Promise<NewRecordedCourse> => {
+  try {
+    // Debug: Log what we're sending
+    console.log('🚀 Making request to create course...');
+    console.log('FormData entries:');
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(`  ${key}: File(${value.name}, ${value.size} bytes, ${value.type})`);
+      } else {
+        console.log(`  ${key}: ${value}`);
+      }
+    }
+
+    // Use the correct endpoint based on your route structure
+    // Since your route file has router.post('/courses', ...) and it's mounted at /courses
+    // The full path should be /courses/courses
+    const endpoint = `${API_BASE}/courses/courses`;
+
+    console.log('📡 Calling endpoint:', endpoint);
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      body: formData,
+      // Don't set Content-Type - let browser handle it for multipart/form-data
+    });
+
+    console.log('📥 Response received:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      headers: Object.fromEntries(res.headers.entries())
+    });
+
+    // Check if we got an error status
+    if (res.status === 404) {
+      throw new Error('Backend route not found. Check if your backend server is running and the route exists.');
+    }
+
+    if (res.status >= 500) {
+      const errorText = await res.text();
+      console.error('❌ Server error response:', errorText.substring(0, 500));
+      throw new Error(`Server error (${res.status}): ${res.statusText}`);
+    }
+
+    // Check if response is JSON
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const textResponse = await res.text();
+      console.error('❌ Non-JSON response:', textResponse.substring(0, 500));
+      
+      // If we got HTML, it's likely a 404 or error page
+      if (textResponse.includes('<!DOCTYPE') || textResponse.includes('<html')) {
+        throw new Error('Backend returned HTML instead of JSON. This usually means the route was not found or there was a server error.');
+      }
+      
+      throw new Error(`Server returned non-JSON response (${res.status}): ${contentType}`);
+    }
+
+    const data = await res.json();
+    console.log('✅ Parsed JSON response:', data);
+
+    if (!res.ok) {
+      const errorMessage = data.error || data.message || `HTTP Error: ${res.status}`;
+      throw new Error(errorMessage);
+    }
+
+    return data as NewRecordedCourse;
+  } catch (error) {
+    console.error('❌ Error creating course:', error);
+    
+    // Provide more helpful error messages
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Cannot connect to server. Is the backend running on port 5000?');
+    }
+    
+   
+
+    throw error;
+  }
+};
 
   export const createLiveCourse = async (courseData: LiveCourses): Promise<LiveCourses> => {
     try {

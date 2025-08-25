@@ -3,42 +3,149 @@
 import { Clock, BookOpen, MapPin, Star } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { useEffect, useState } from "react"
 
 export function ProgramDetails() {
+  const [currentLang, setCurrentLang] = useState('fr') // Défaut en français
+
+  // Objet de traductions
+  const translations = {
+    en: {
+      title: "Program Structure and Details",
+      subtitle: "Our hybrid format combines the flexibility of virtual learning with hands-on sessions, specifically designed for active healthcare professionals.",
+      features: {
+        duration: {
+          title: "Duration and Format",
+          description: "12-month hybrid program with weekly virtual sessions and monthly practical workshops"
+        },
+        subjects: {
+          title: "Main Subjects",
+          description: "TCM Theory, Acupuncture, Chinese Phytotherapy, Therapeutic Dietetics, Diagnostic Methods"
+        },
+        internship: {
+          title: "China Internship Option",
+          description: "2-week intensive training program at Shanghai University facilities (optional)"
+        }
+      },
+      highlightsTitle: "Program Highlights",
+      highlights: [
+        "Expert instructors from Shanghai University",
+        "Interactive virtual learning platform",
+        "Hands-on workshops in person",
+        "International certification"
+      ],
+      imageAlt: "TCM Training Program"
+    },
+    fr: {
+      title: "Structure et Détails du Programme",
+      subtitle: "Notre format hybride combine la flexibilité de l'apprentissage virtuel avec des sessions pratiques, conçu spécifiquement pour les professionnels de santé en activité.",
+      features: {
+        duration: {
+          title: "Durée et Format",
+          description: "Programme hybride de 12 mois avec sessions virtuelles hebdomadaires et ateliers pratiques mensuels"
+        },
+        subjects: {
+          title: "Matières Principales",
+          description: "Théorie MTC, Acupuncture, Phytothérapie Chinoise, Diététique Thérapeutique, Méthodes de Diagnostic"
+        },
+        internship: {
+          title: "Option Stage en Chine",
+          description: "Programme de formation intensive de 2 semaines dans les installations de l'Université de Shanghai (optionnel)"
+        }
+      },
+      highlightsTitle: "Points Forts du Programme",
+      highlights: [
+        "Instructeurs experts de l'Université de Shanghai",
+        "Plateforme d'apprentissage virtuel interactive",
+        "Ateliers pratiques en présentiel",
+        "Certification internationale"
+      ],
+      imageAlt: "Programme de Formation MTC"
+    },
+    zh: {
+      title: "课程结构与详情",
+      subtitle: "我们的混合式学习模式将虚拟学习的灵活性与实践课程相结合，专为在职医疗专业人士设计。",
+      features: {
+        duration: {
+          title: "学制与形式",
+          description: "12个月混合式课程，每周虚拟课程和每月实践工作坊"
+        },
+        subjects: {
+          title: "主要科目",
+          description: "中医理论、针灸、中药治疗、食疗、诊断方法"
+        },
+        internship: {
+          title: "中国实习选项",
+          description: "在上海大学设施进行为期2周的强化培训项目（可选）"
+        }
+      },
+      highlightsTitle: "课程亮点",
+      highlights: [
+        "上海大学专家导师",
+        "互动虚拟学习平台",
+        "面授实践工作坊",
+        "国际认证"
+      ],
+      imageAlt: "中医培训项目"
+    }
+  }
+
+  // Fonction de traduction
+  const t = (key: string, options?: { defaultValue?: string }) => {
+    const keys = key.split('.')
+    let value: any = translations[currentLang as keyof typeof translations] || translations.fr
+    
+    for (const k of keys) {
+      value = value?.[k]
+    }
+    
+    return value || options?.defaultValue || key
+  }
+
+  // Écouter les changements de langue
+  useEffect(() => {
+    const handleLanguageChange = (event: any) => {
+      if (event.detail?.language) {
+        setCurrentLang(event.detail.language)
+      }
+    }
+
+    window.addEventListener('languageChanged', handleLanguageChange)
+    
+    // Charger la préférence de langue sauvegardée
+    const savedLang = localStorage.getItem('preferredLanguage')
+    if (savedLang) {
+      setCurrentLang(savedLang)
+    }
+
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange)
+    }
+  }, [])
+
   const features = [
     {
       icon: Clock,
       color: "from-red-400 to-rose-500",
-      title: "Durée et Format",
-      description:
-        "Programme hybride de 12 mois avec sessions virtuelles hebdomadaires et ateliers pratiques mensuels",
+      titleKey: "features.duration.title",
+      descriptionKey: "features.duration.description",
     },
     {
       icon: BookOpen,
       color: "from-blue-400 to-cyan-500",
-      title: "Matières Principales",
-      description:
-        "Théorie MTC, Acupuncture, Phytothérapie Chinoise, Diététique Thérapeutique, Méthodes de Diagnostic",
+      titleKey: "features.subjects.title",
+      descriptionKey: "features.subjects.description",
     },
     {
       icon: MapPin,
       color: "from-green-400 to-emerald-500",
-      title: "Option Stage en Chine",
-      description:
-        "Programme de formation intensive de 2 semaines dans les installations de l'Université de Shanghai (optionnel)",
+      titleKey: "features.internship.title",
+      descriptionKey: "features.internship.description",
     },
   ]
 
-  const highlights = [
-    "Instructeurs experts de l'Université de Shanghai",
-    "Plateforme d'apprentissage virtuel interactive",
-    "Ateliers pratiques en présentiel",
-    "Certification internationale",
-  ]
-
   return (
-    <section    id="programme" className="relative overflow-hidden py-32 sm:py-36 bg-gradient-to-b from-white via-red-50 to-white">
-
+    <section id="programme" className="relative overflow-hidden py-32 sm:py-36 bg-gradient-to-b from-white via-red-50 to-white">
       <GradientBackdrop />
       <GridBackdrop />
 
@@ -52,11 +159,10 @@ export function ProgramDetails() {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-3xl lg:text-4xl font-extrabold mb-6 bg-gradient-to-b from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
-              Structure et Détails du Programme
+              {t('title')}
             </h2>
             <p className="text-lg text-neutral-600 mb-10 leading-relaxed">
-              Notre format hybride combine la flexibilité de l'apprentissage virtuel avec des sessions pratiques, conçu
-              spécifiquement pour les professionnels de santé en activité.
+              {t('subtitle')}
             </p>
 
             <div className="space-y-8">
@@ -64,7 +170,7 @@ export function ProgramDetails() {
                 const Icon = feature.icon
                 return (
                   <motion.div
-                    key={feature.title}
+                    key={feature.titleKey}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true, amount: 0.4 }}
@@ -80,8 +186,12 @@ export function ProgramDetails() {
                       <Icon className="w-7 h-7 text-white drop-shadow-md" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-neutral-900 mb-1">{feature.title}</h3>
-                      <p className="text-neutral-600">{feature.description}</p>
+                      <h3 className="font-bold text-neutral-900 mb-1">
+                        {t(feature.titleKey)}
+                      </h3>
+                      <p className="text-neutral-600">
+                        {t(feature.descriptionKey)}
+                      </p>
                     </div>
                   </motion.div>
                 )
@@ -100,7 +210,7 @@ export function ProgramDetails() {
             <div className="relative group">
               <Image
                 src="/tcm-acupuncture-classroom.png"
-                alt="Programme de Formation MTC"
+                alt={t('imageAlt')}
                 width={600}
                 height={400}
                 className="w-full h-80 object-cover transition-transform duration-700 group-hover:scale-105"
@@ -109,9 +219,11 @@ export function ProgramDetails() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
             </div>
             <div className="p-8">
-              <h4 className="font-bold text-neutral-900 mb-4">Points Forts du Programme</h4>
+              <h4 className="font-bold text-neutral-900 mb-4">
+                {t('highlightsTitle')}
+              </h4>
               <ul className="space-y-3 text-neutral-700">
-                {highlights.map((point, i) => (
+                {translations[currentLang as keyof typeof translations].highlights.map((point: string, i: number) => (
                   <motion.li
                     key={point}
                     initial={{ opacity: 0, x: 20 }}

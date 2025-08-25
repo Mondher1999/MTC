@@ -2,6 +2,7 @@ import { RideSchedule } from "../types/RideSchedule";
 import { fetchAPI } from "../lib/api";
 import { Clients, Userss } from "../types/Clients";
 import { NewRide } from "@/types/RideSchedule";
+import { Candidate } from "@/types/Candidate";
 
 export const fetchRideSchedules = async (): Promise<RideSchedule[]> => {
   try {
@@ -37,6 +38,17 @@ export const fetchStudentsVerified = async (): Promise<Userss[]> => {
 };
 
 
+export const getStudentsNotVerified = async (): Promise<Userss[]> => {
+  try {
+    const data = await fetchAPI("/auth/students-Notverified", {
+      method: "GET",
+    });
+    return data.students || [];
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    return [];
+  }
+};
 
 
 // 2️⃣ Get all teachers
@@ -238,6 +250,43 @@ export const createUser = async (UserssData: Userss): Promise<Userss> => {
 };
 
 
+export const createCandidate = async (candidate: Candidate): Promise<Candidate> => {
+  try {
+    const data = await fetchAPI("/candidate/registerCandidate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(candidate),
+    });
+
+    return data.Userss || data;
+  } catch (err: any) {
+    const translated = translateError(err.message);
+    console.error("Erreur création candidate:", translated);
+    throw new Error(translated);
+  }
+};
+
+
+
+export const RegisterUser = async (
+  id: string,
+  formData: FormData
+): Promise<Userss> => {
+  try {
+    const data = await fetchAPI(`/auth/registerForm/${id}`, {
+      method: "PATCH",
+      // Don't set Content-Type for FormData - let browser handle multipart/form-data
+      body: formData,
+    });
+
+    return data.user || data;
+  } catch (err: any) {
+    const translated = translateError(err.message);
+    console.error("Erreur mise à jour utilisateur:", translated);
+    throw new Error(translated);
+  }
+};
+
 
 export const DeleteUserss = async (UserssId: string): Promise<void> => {
   try {
@@ -255,12 +304,12 @@ export const DeleteUserss = async (UserssId: string): Promise<void> => {
 };
 
 // In your Service.js or Service.ts file
-export const updateClient = async (id: string, updatedClientData: Clients) => {
+export const validateUserAccess = async (id: string,  UserssData: Partial<Userss>) => {
   try {
-    const response = await fetchAPI(`/customer/customers/${id}`, {
+    const response = await fetchAPI(`/auth/validate-user/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedClientData),
+      body: JSON.stringify(UserssData),
     });
 
     return response; // Assuming the API returns the created Driver object as JSON

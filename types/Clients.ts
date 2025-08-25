@@ -20,6 +20,14 @@ export interface Userss {
   email: string;
   formValidated?:string;
   accessValidated?:string;
+  dateOfBirth?: string,
+  gender?: string,
+  address?: string,
+  motivation?: string,
+  receipt?: string;  // File while uploading, string after saved
+  photoId?: string;  // same here
 
 
 }
+
+

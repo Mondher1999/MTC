@@ -11,9 +11,13 @@ import { DashboardHeader } from "./dashboard-header"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
+  onTabChange: (tabValue: string) => void // ← NOUVELLE LIGNE
+  activeTab: string // ← NOUVELLE LIGNE
 }
 
-export function DashboardLayout({ children }: DashboardLayoutProps) {
+export function DashboardLayout({ children, onTabChange, activeTab }: DashboardLayoutProps) {
+
+
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -37,11 +41,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={() => setMobileMenuOpen(false)} />
       )}
 
-      <DashboardSidebar
-        sidebarOpen={sidebarOpen}
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
-      />
+        <DashboardSidebar 
+          sidebarOpen={sidebarOpen} 
+          mobileMenuOpen={mobileMenuOpen} 
+          setMobileMenuOpen={setMobileMenuOpen}
+          onTabChange={onTabChange} // ← NOUVELLE LIGNE
+          activeTab={activeTab} // ← NOUVELLE LIGNE
+        />
 
       {/* Main Content */}
       <div className={cn("min-h-screen transition-all duration-300 ease-in-out", sidebarOpen ? "md:pl-64" : "md:pl-0")}>

@@ -1,31 +1,43 @@
-import { Home, Radio, BookOpen } from "lucide-react"
+import { Home, Radio, BookOpen, Users } from "lucide-react"
+import { JSX } from "react"
 
-export const sidebarItems = [
+export interface SidebarItem {
+  title: string
+  icon: JSX.Element
+  isActive?: boolean
+  badge?: string
+  badgeVariant?: "destructive" | "outline" | "secondary"
+  tabValue: string
+  roleRestriction?: string
+  items?: any[]
+}
+
+export const sidebarItems: SidebarItem[] = [
   {
     title: "Tableau de Bord",
     icon: <Home />,
     isActive: true,
+    tabValue: "dashboard",
+    roleRestriction: "enseignant" // Enseignant won't see dashboard
   },
   {
     title: "Cours en Direct",
     icon: <Radio className="text-red-500" />,
     badge: "LIVE",
     badgeVariant: "destructive" as const,
-    items: [
-      { title: "Acupuncture Avancée", url: "#", badge: "LIVE", isLive: true, time: "14:30" },
-      { title: "Phytothérapie Chinoise", url: "#", badge: "15:00", isUpcoming: true },
-      { title: "Diagnostic Énergétique", url: "#", badge: "17:00", isUpcoming: true },
-    ],
+    tabValue: "coursesDirect"
   },
   {
     title: "Cours Enregistrés",
     icon: <BookOpen />,
-    badge: "2",
-    items: [
-      { title: "Fondements MTC", url: "#", progress: 0, locked: false },
-      { title: "Méridiens & Points", url: "#", progress: 0, locked: true },
-      { title: "Pharmacopée", url: "#", progress: 0, locked: true },
-      { title: "Diététique Énergétique", url: "#", progress: 0, locked: false },
-    ],
+    tabValue: "courses",
+    roleRestriction: "enseignant" // Enseignant won't see recorded courses
   },
+  {
+    title: "Administration",
+    icon: <Users />,
+    tabValue: "users",
+    roleRestriction: "etudiant" // Student won't see administration
+    // Note: Additional filter in sidebar component prevents enseignant from seeing this too
+  }
 ]

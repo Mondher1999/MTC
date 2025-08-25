@@ -46,6 +46,7 @@ const [error, setError] = useState<string | null>(null)
         telNumber: formData.telNumber,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        
       }
   
       const created = await createUser(userPayload)
@@ -53,7 +54,7 @@ const [error, setError] = useState<string | null>(null)
       // Reset form
       const userName = `${formData.firstName} ${formData.lastName}`
       let roleText
-      if (formData.role === "etudiant") roleText = "étudiant"
+      if (formData.role === "etudiant") roleText = "apprenant"
       else if (formData.role === "enseignant") roleText = "enseignant"
       else if (formData.role === "admin") roleText = "administrateur"
   
@@ -67,6 +68,7 @@ const [error, setError] = useState<string | null>(null)
   
       onClose()
       onSuccess(`L'${roleText} "${userName}" a été ajouté avec succès !`)
+      
     } catch (err: any) {
       console.error("Error creating user:", err)
       setError(err.message || "Une erreur est survenue lors de la création de l'utilisateur.")
@@ -83,7 +85,7 @@ const [error, setError] = useState<string | null>(null)
             <Plus className="h-6 w-6" />
             Ajouter un Nouvel Utilisateur
           </DialogTitle>
-          <DialogDescription>Créez un compte pour un nouvel étudiant ou enseignant ou administrateur</DialogDescription>
+          <DialogDescription>Créez un compte pour un nouvel apprenant ou enseignant ou administrateur</DialogDescription>
         </DialogHeader>
 
         <motion.form
@@ -105,7 +107,7 @@ const [error, setError] = useState<string | null>(null)
                 <SelectItem value="etudiant">
                   <div className="flex items-center gap-2">
                     <GraduationCap className="h-4 w-4" />
-                    Étudiant
+                    apprenant
                   </div>
                 </SelectItem>
                 <SelectItem value="enseignant">

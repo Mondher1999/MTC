@@ -9,13 +9,16 @@ interface User {
   email: string;
   name: string;
   role: string;
+  formValidated?: boolean;   // 👈 ajoute ces champs si backend les renvoie
+  accessValidated?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>; // 👈 plus void
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -57,18 +60,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
     fetchUser();
   }, []);
+
+  const refreshUser = async () => {
+    try {
+      const response = await api.get("/auth/me") // ✅ endpoint to get current user
+      setUser(response.data)
+    } catch (error) {
+      console.error("Erreur rafraîchissement user:", error)
+    }
+  }
+  
     
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<User> => {
     const data = await loginService(email, password);
-
+  
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
-
+  
     api.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
-
+  
     setUser(data.user);
+  
+    return data.user; // 👈 important
   };
+  
 
   const logout = async () => {
     await logoutService();
@@ -78,11 +94,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser  }}>
       {children}
     </AuthContext.Provider>
   );
 }
+
+
 
 export const useAuth = () => {
   const context = useContext(AuthContext);

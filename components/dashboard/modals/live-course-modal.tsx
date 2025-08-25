@@ -17,11 +17,13 @@ import {  createLiveCourse } from "@/services/liveCourse-service"
 import {  Loader2 } from "lucide-react"
 import {  Userss } from "../../../types/Clients";
 import { fetchStudentsVerified, fetchTeachers } from "@/services/Service"
+import { LiveCourses } from "@/types/Courses"
 
 interface LiveCourseModalProps {
   isOpen: boolean
   onClose: () => void
-  onSuccess: (message: string) => void
+  onSuccess: (message: string, newCourse: LiveCourses) => void
+
 }
 
 
@@ -33,6 +35,7 @@ const [students, setStudents] = useState<Userss[]>([]);
 const [teachers, setTeachers] = useState<Userss[]>([]);
 
   const [formData, setFormData] = useState({
+    _id : "",
     courseName: "",
     instructorId: "",
     description: "",
@@ -105,6 +108,7 @@ const [teachers, setTeachers] = useState<Userss[]>([]);
       const created = await createLiveCourse(formData)
   
       setFormData({
+        _id:"",
         courseName: "",
         description: "",
         instructorId:"",
@@ -117,7 +121,7 @@ const [teachers, setTeachers] = useState<Userss[]>([]);
       })
   
       onClose()
-      onSuccess(`Le cours en direct "${created.courseName}" a été créé avec succès !`)
+      onSuccess(`Le cours enregistré "${created.courseName}" a été créé avec succès !`, created)
     } catch (err: any) {
       console.error("Error creating course:", err)
       setError(err.message || "Une erreur est survenue lors de la création du cours.")
@@ -296,7 +300,7 @@ const [teachers, setTeachers] = useState<Userss[]>([]);
             <div className="space-y-3">
             <Label className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Étudiants ayant accès
+              apprenants ayant accès
             </Label>
 
             <div className="flex justify-end mb-2">

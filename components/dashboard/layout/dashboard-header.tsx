@@ -23,11 +23,10 @@ import {
   ChevronDown,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
 import { useLoading } from "@/contexts/LoadingContext"
 import { useAuth } from "@/contexts/AuthContext"
-
-
 
 interface DashboardHeaderProps {
   sidebarOpen: boolean
@@ -39,21 +38,81 @@ export function DashboardHeader({ sidebarOpen, setSidebarOpen, setMobileMenuOpen
   const notifications = 3
   const router = useRouter()
   const { startLoading, stopLoading } = useLoading()
-
   const { user, logout: authLogout } = useAuth()
 
+  // Language state
+  const [currentLang, setCurrentLang] = useState('en')
 
-const handleSignOut = async () => {
-  try {
-    startLoading();
-    await authLogout(); // <-- use the logout from AuthContext
-    stopLoading();
-    router.push("/auth");
-  } catch (error) {
-    console.error("Error signing out:", error);
-    stopLoading();
+  // Translation object
+  const translations = {
+    en: {
+      appTitle: 'Formation MTC ',
+      logout: 'Sign Out'
+    },
+    fr: {
+      appTitle: 'Formation MTC',
+      logout: 'Se déconnecter'
+    },
+    zh: {
+      appTitle: 'MTC培训',
+      logout: '登出'
+    }
   }
-};
+
+  // Translation function
+  const t = (key: string, options?: { defaultValue?: string }) => {
+    const langTranslations = translations[currentLang as keyof typeof translations] || translations.en
+    const value = langTranslations[key as keyof typeof langTranslations]
+    return value || options?.defaultValue || key
+  }
+
+  // Get display title based on user role
+  const getDisplayTitle = () => {
+    if (user?.role === "enseignant" || user?.role === "admin") {
+      return t("appTitle")
+    }
+    return t("appTitle")
+  }
+
+  // Listen for language changes
+  useEffect(() => {
+    const handleLanguageChange = (event: any) => {
+      if (event.detail?.language) {
+        setCurrentLang(event.detail.language)
+      }
+    }
+
+    window.addEventListener('languageChanged', handleLanguageChange)
+    
+    // Load saved language preference
+    const savedLang = localStorage.getItem('preferredLanguage')
+    if (savedLang) {
+      setCurrentLang(savedLang)
+    }
+
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange)
+    }
+  }, [])
+
+  // Auto-set Chinese for enseignant role
+  useEffect(() => {
+    if (user?.role === "enseignant") {
+      setCurrentLang('zh')
+    }
+  }, [user?.role])
+
+  const handleSignOut = async () => {
+    try {
+      startLoading();
+      await authLogout();
+      stopLoading();
+      router.push("/auth");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      stopLoading();
+    }
+  };
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur">
@@ -64,8 +123,10 @@ const handleSignOut = async () => {
         <PanelLeft className="h-5 w-5" />
       </Button>
       <div className="flex flex-1 items-center justify-between">
-        <h1 className="text-xl font-semibold">Formation MTC - ATAMTC</h1>
+        <h1 className="text-xl font-semibold">{getDisplayTitle()}</h1>
         <div className="flex items-center gap-3">
+
+          {/*
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -92,6 +153,7 @@ const handleSignOut = async () => {
               <TooltipContent>Notifications</TooltipContent>
             </Tooltip>
           </TooltipProvider>
+         */ }
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -107,7 +169,10 @@ const handleSignOut = async () => {
                 </Avatar>
                 <div className="hidden sm:flex flex-col items-start">
                   <span className="text-sm font-medium">{user?.name}</span>
-                  <span className="text-xs text-muted-foreground">{user?.role}</span>
+                  <span className="text-xs text-muted-foreground">
+                        {user?.role === "enseignant" ? "教师" : user?.role}
+                      </span>
+
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </Button>
@@ -118,22 +183,28 @@ const handleSignOut = async () => {
             >
               {/* Profile Section */}
               <div className="p-4 border-b border-border/50">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12 border-2 border-primary">
-                    <AvatarImage src="/placeholder.svg?height=48&width=48" alt="Dr. Dupont" />
-                    <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white font-semibold">
-                      DD
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold text-foreground">Dr. Dupont</p>
-                    <p className="text-sm text-muted-foreground">dr.dupont@mtc.com</p>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-12 w-12 border-2 border-primary">
+                        <AvatarImage src="/placeholder.svg?height=48&width=48" alt={user?.name || "Avatar"} />
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white font-semibold">
+                          {user?.name?.[0]?.toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-foreground break-words whitespace-pre-line">
+                          {user?.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground break-words whitespace-pre-line">
+                          {user?.email}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
               {/* Menu Items */}
               <div className="p-2">
+
+                {/*
                 <DropdownMenuItem className="rounded-xl p-3 cursor-pointer hover:bg-primary/10 transition-colors duration-200">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-primary/20">
@@ -179,6 +250,8 @@ const handleSignOut = async () => {
                   </div>
                 </DropdownMenuItem>
 
+              */  }
+
                 <DropdownMenuSeparator className="my-2" />
 
                 <DropdownMenuItem
@@ -190,7 +263,7 @@ const handleSignOut = async () => {
                       <LogOut className="h-4 w-4 text-red-500" />
                     </div>
                     <div>
-                      <p className="font-medium">Se déconnecter</p>
+                      <p className="font-medium">{t("logout")}</p>
                     </div>
                   </div>
                 </DropdownMenuItem>

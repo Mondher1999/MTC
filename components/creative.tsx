@@ -145,7 +145,7 @@ const upcomingEvents = [
 
 const sidebarItems = [
   {
-    title: "Tableau de Bord",
+    title: "Administration",
     icon: <Home />,
     isActive: true,
   },
@@ -400,7 +400,7 @@ export function DesignaliCreative() {
                   <span>Dr. Dupont</span>
                 </div>
                 <Badge variant="outline" className="ml-auto">
-                  Étudiant
+                apprenant
                 </Badge>
               </button>
             </div>
@@ -553,7 +553,7 @@ export function DesignaliCreative() {
                   <span>Dr. Dupont</span>
                 </div>
                 <Badge variant="outline" className="ml-auto">
-                  Étudiant
+                apprenant
                 </Badge>
               </button>
             </div>
@@ -1181,7 +1181,7 @@ export function DesignaliCreative() {
                                 </div>
                                 <div className="flex items-center">
                                   <Users className="mr-1 h-4 w-4" />
-                                  {course.students} étudiants
+                                  {course.students} apprenants
                                 </div>
                               </div>
                             </CardContent>
@@ -1212,7 +1212,7 @@ export function DesignaliCreative() {
                         <div className="space-y-2">
                           <h2 className="text-3xl font-bold">Rejoignez la Communauté</h2>
                           <p className="max-w-[600px] text-white/80">
-                            Connectez-vous avec d'autres étudiants et experts en Médecine Traditionnelle Chinoise.
+                            Connectez-vous avec d'autres apprenants et experts en Médecine Traditionnelle Chinoise.
                           </p>
                         </div>
                         <Button className="w-fit rounded-2xl bg-white text-emerald-700 hover:bg-white/90">

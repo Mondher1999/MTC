@@ -5,15 +5,58 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { Clock, Users, CheckCircle, Play, Lock, Globe, GraduationCap } from "lucide-react"
+import { Clock, Users, CheckCircle, Play, Lock, Globe, GraduationCap, Target, Brain, Leaf, Heart, BookOpen } from "lucide-react"
 
 import { courses, recentLessons, upcomingEvents } from "../data/courses-data"
+import { NewRecordedCourse } from "@/types/Courses"
+import { useEffect, useState } from "react"
+import { fetchCourses } from "@/services/liveCourse-service"
+import { VideoPlayerModal } from "../modals/VideoPlayerModal"
 
 interface DashboardOverviewProps {
   onNavigateToTab: (tab: string) => void
 }
 
 export function DashboardOverview({ onNavigateToTab }: DashboardOverviewProps) {
+
+  const [courses, setCourses] = useState<NewRecordedCourse[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false)
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const data = await fetchCourses()
+        setCourses(data)
+      } catch (error) {
+        console.error("Error fetching students:", error)
+        setError("Erreur lors du chargement des étudiants. Veuillez réessayer.")
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchCourse()
+  }, [])
+
+  function getCategoryIcon(category: string) {
+    switch (category) {
+      case "Pratique":
+        return <Target className="text-secondary h-6 w-6" />
+      case "Théorie":
+        return <Brain className="text-primary h-6 w-6" />
+      case "Pharmacologie":
+        return <Leaf className="text-accent h-6 w-6" />
+      case "Nutrition":
+        return <Heart className="text-chart-4 h-6 w-6" />
+      default:
+        return <BookOpen className="text-muted-foreground h-6 w-6" /> // fallback
+    }
+  }
+
+
   return (
     <>
       <section>
@@ -70,44 +113,54 @@ export function DashboardOverview({ onNavigateToTab }: DashboardOverviewProps) {
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {courses.map((course) => (
-            <motion.div key={course.name} whileHover={{ scale: 1.02, y: -5 }} whileTap={{ scale: 0.98 }}>
-              <Card className="overflow-hidden rounded-3xl border-2 hover:border-primary/50 transition-all duration-300">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted">{course.icon}</div>
-                    <Badge variant="outline" className="rounded-xl">
-                      {course.category}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <CardTitle className="text-lg">{course.name}</CardTitle>
-                  <CardDescription className="mb-3">{course.description}</CardDescription>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Progrès</span>
-                      <span>{course.progress}%</span>
-                    </div>
-                    <Progress value={course.progress} className="h-2 rounded-xl" />
-                  </div>
-                  <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
-                    <div className="flex items-center">
-                      <Clock className="mr-1 h-4 w-4" />
-                      {course.duration}
-                    </div>
-                    <div className="flex items-center">
-                      <Users className="mr-1 h-4 w-4" />
-                      {course.students}
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="secondary" className="w-full rounded-2xl" disabled>
-                    <Lock className="mr-2 h-4 w-4" />
-                    Contenu verrouillé
-                  </Button>
-                </CardFooter>
-              </Card>
+            <motion.div key={course._id} whileHover={{ scale: 1.02, y: -5 }} whileTap={{ scale: 0.98 }}>
+             <Card className="overflow-hidden rounded-3xl border hover:border-primary/50 transition-all duration-300">
+          
+          {/* Header avec icône + catégorie */}
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted">
+                {getCategoryIcon(String(course.category))}
+              </div>
+              <Badge variant="outline" className="rounded-xl">
+                {course.category}
+              </Badge>
+            </div>
+          </CardHeader>
+
+          {/* Contenu du cours */}
+          <CardContent className="space-y-2 pb-2">
+                        <CardTitle className="text-lg">{course.courseName}</CardTitle>
+                        
+                        <CardDescription className="whitespace-pre-line break-words">
+                          {course.description}
+                        </CardDescription>
+
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          <p><span className="font-medium">Instructeur :</span> {course.instructorName}</p>
+                          <p><span className="font-medium">Durée :</span> {course.duration} min</p>
+                          <p>
+                            <span className="font-medium">Date :</span>{" "}
+                            {new Date(String(course.recordingDate)).toLocaleDateString("fr-FR", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </p>
+                        </div>
+                      </CardContent>
+
+          {/* Footer (actions) */}
+          <CardFooter>
+  <Button
+    onClick={() => setIsVideoModalOpen(true)}
+    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-2xl py-2.5 font-medium shadow-sm transition-all duration-200 flex items-center justify-center gap-2"
+  >
+    <Play className="h-4 w-4" />
+    Regarder le cours
+  </Button>
+</CardFooter>
+        </Card>
             </motion.div>
           ))}
         </div>
@@ -225,6 +278,12 @@ export function DashboardOverview({ onNavigateToTab }: DashboardOverviewProps) {
           </Card>
         </div>
       </section>
+
+      <VideoPlayerModal
+  isOpen={isVideoModalOpen}
+  onClose={() => setIsVideoModalOpen(false)}
+  course={courses} // Votre objet cours
+/>
     </>
   )
 }

@@ -1,30 +1,153 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { BookOpen, Users, Award, ChevronRight } from "lucide-react"
 
 export function LearningMethodology() {
+  const [currentLang, setCurrentLang] = useState('fr') // Défaut en français
+
+  // Objet de traductions
+  const translations = {
+    en: {
+      badge: "TCM Training",
+      title: "Hybrid Learning",
+      subtitle: "Where students discover theoretical concepts remotely and put them into practice during face-to-face sessions with the support of our experts.",
+      steps: {
+        theory: {
+          title: "Remote Theory",
+          description: "Students explore fundamental TCM concepts remotely before applying them in face-to-face sessions, promoting prior understanding."
+        },
+        practice: {
+          title: "Practical Support",
+          description: "Interactive sessions allow students to work on practical cases with personalized support from our experts."
+        },
+        mastery: {
+          title: "Autonomous Mastery",
+          description: "Encourage student autonomy, strengthen their active participation and improve their engagement through targeted content and practical activities."
+        }
+      },
+      badges: {
+        sessions: "Face-to-face sessions",
+        support: "Online support",
+        evaluations: "Continuous assessments",
+        coaching: "Expert coaching"
+      },
+      buttons: {
+        join: "Join the training",
+        discover: "Discover the program"
+      }
+    },
+    fr: {
+      badge: "Formation MTC",
+      title: "L'Apprentissage Hybride",
+      subtitle: "Où les apprenants découvrent les concepts théoriques à distance et les mettent en pratique lors de sessions présentielles avec l'accompagnement de nos experts.",
+      steps: {
+        theory: {
+          title: "Théorie à Distance",
+          description: "Les apprenants explorent les concepts fondamentaux de la MTC à distance avant de les appliquer en sessions présentielles, favorisant une compréhension préalable."
+        },
+        practice: {
+          title: "Accompagnement Pratique",
+          description: "Les sessions interactives permettent aux apprenants de travailler sur des cas pratiques avec un accompagnement personnalisé de nos experts."
+        },
+        mastery: {
+          title: "Maîtrise Autonome",
+          description: "Encourager l'autonomie des apprenants, renforcer leur participation active et améliorer leur engagement grâce à du contenu ciblé et des activités pratiques."
+        }
+      },
+      badges: {
+        sessions: "Sessions présentielles",
+        support: "Supports en ligne",
+        evaluations: "Évaluations continues",
+        coaching: "Coaching expert"
+      },
+      buttons: {
+        join: "Rejoindre la formation",
+        discover: "Découvrir le programme"
+      }
+    },
+    zh: {
+      badge: "中医培训",
+      title: "混合式学习",
+      subtitle: "学生远程学习理论概念，然后在我们专家的支持下在面授课程中将其付诸实践。",
+      steps: {
+        theory: {
+          title: "远程理论学习",
+          description: "学生在面授课程中应用之前，先远程探索中医基础概念，促进预先理解。"
+        },
+        practice: {
+          title: "实践指导",
+          description: "互动课程允许学生在我们专家的个性化支持下处理实际案例。"
+        },
+        mastery: {
+          title: "自主掌握",
+          description: "通过有针对性的内容和实践活动，鼓励学生自主学习，加强积极参与并提高学习投入度。"
+        }
+      },
+      badges: {
+        sessions: "面授课程",
+        support: "在线支持",
+        evaluations: "持续评估",
+        coaching: "专家指导"
+      },
+      buttons: {
+        join: "加入培训",
+        discover: "了解课程"
+      }
+    }
+  }
+
+  // Fonction de traduction
+  const t = (key: string, options?: { defaultValue?: string }) => {
+    const keys = key.split('.')
+    let value: any = translations[currentLang as keyof typeof translations] || translations.fr
+    
+    for (const k of keys) {
+      value = value?.[k]
+    }
+    
+    return value || options?.defaultValue || key
+  }
+
+  // Écouter les changements de langue
+  useEffect(() => {
+    const handleLanguageChange = (event: any) => {
+      if (event.detail?.language) {
+        setCurrentLang(event.detail.language)
+      }
+    }
+
+    window.addEventListener('languageChanged', handleLanguageChange)
+    
+    // Charger la préférence de langue sauvegardée
+    const savedLang = localStorage.getItem('preferredLanguage')
+    if (savedLang) {
+      setCurrentLang(savedLang)
+    }
+
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange)
+    }
+  }, [])
+
   const steps: Step[] = [
     {
       id: 1,
-      title: "Théorie à Distance",
-      description:
-        "Les étudiants explorent les concepts fondamentaux de la MTC à distance avant de les appliquer en sessions présentielles, favorisant une compréhension préalable.",
+      titleKey: "steps.theory.title",
+      descriptionKey: "steps.theory.description",
       Icon: BookOpen,
     },
     {
       id: 2,
-      title: "Accompagnement Pratique",
-      description:
-        "Les sessions interactives permettent aux étudiants de travailler sur des cas pratiques avec un accompagnement personnalisé de nos experts.",
+      titleKey: "steps.practice.title",
+      descriptionKey: "steps.practice.description",
       Icon: Users,
     },
     {
       id: 3,
-      title: "Maîtrise Autonome",
-      description:
-        "Encourager l'autonomie des étudiants, renforcer leur participation active et améliorer leur engagement grâce à du contenu ciblé et des activités pratiques.",
+      titleKey: "steps.mastery.title",
+      descriptionKey: "steps.mastery.description",
       Icon: Award,
     },
   ]
@@ -38,7 +161,7 @@ export function LearningMethodology() {
       <GradientBackdrop />
       <GridBackdrop />
 
-      <div className="relative mx-auto pt-18   max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto pt-18 max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Titre */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -49,18 +172,17 @@ export function LearningMethodology() {
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-red-600 shadow-sm ring-1 ring-red-500/20">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-red-500" />
-            Formation MTC
+            {t('badge')}
           </span>
 
           <h2 className="mt-4 text-4xl font-extrabold leading-tight text-neutral-900 sm:text-5xl">
             <span className="bg-gradient-to-b from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
-              L'Apprentissage Hybride
+              {t('title')}
             </span>
           </h2>
 
           <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-neutral-600">
-            Où les étudiants découvrent les concepts théoriques à distance et les mettent en pratique lors de sessions
-            présentielles avec l'accompagnement de nos experts.
+            {t('subtitle')}
           </p>
         </motion.div>
 
@@ -77,7 +199,7 @@ export function LearningMethodology() {
 
           <div className="grid gap-6 sm:gap-8 md:grid-cols-3">
             {steps.map((step, idx) => (
-              <StepCard key={step.id} step={step} index={idx} />
+              <StepCard key={step.id} step={step} index={idx} t={t} />
             ))}
           </div>
         </div>
@@ -90,10 +212,10 @@ export function LearningMethodology() {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="mt-14 flex flex-wrap items-center justify-center gap-3"
         >
-          <Badge>Sessions présentielles</Badge>
-          <Badge>Supports en ligne</Badge>
-          <Badge>Évaluations continues</Badge>
-          <Badge>Coaching expert</Badge>
+          <Badge>{t('badges.sessions')}</Badge>
+          <Badge>{t('badges.support')}</Badge>
+          <Badge>{t('badges.evaluations')}</Badge>
+          <Badge>{t('badges.coaching')}</Badge>
         </motion.div>
 
         {/* Boutons CTA */}
@@ -108,14 +230,14 @@ export function LearningMethodology() {
             href="#contact"
             className="group inline-flex items-center gap-2 rounded-2xl bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-600/30 ring-1 ring-red-600/20 transition duration-300 hover:translate-y-[-2px] hover:shadow-xl hover:shadow-red-600/40"
           >
-            Rejoindre la formation
+            {t('buttons.join')}
             <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </a>
           <a
             href="#programme"
             className="inline-flex items-center gap-2 rounded-2xl border border-neutral-200 bg-white px-5 py-3 text-sm font-semibold text-neutral-900 shadow-sm ring-1 ring-black/5 transition hover:bg-neutral-50"
           >
-            Découvrir le programme
+            {t('buttons.discover')}
           </a>
         </motion.div>
       </div>
@@ -125,12 +247,12 @@ export function LearningMethodology() {
 
 interface Step {
   id: number
-  title: string
-  description: string
+  titleKey: string
+  descriptionKey: string
   Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
 
-function StepCard({ step, index }: { step: Step; index: number }) {
+function StepCard({ step, index, t }: { step: Step; index: number; t: (key: string) => string }) {
   const { Icon } = step
   return (
     <motion.article
@@ -157,8 +279,8 @@ function StepCard({ step, index }: { step: Step; index: number }) {
         </div>
 
         {/* Titre et description */}
-        <h3 className="text-xl font-bold text-neutral-900">{step.title}</h3>
-        <p className="mt-3 text-base leading-relaxed text-neutral-600">{step.description}</p>
+        <h3 className="text-xl font-bold text-neutral-900">{t(step.titleKey)}</h3>
+        <p className="mt-3 text-base leading-relaxed text-neutral-600">{t(step.descriptionKey)}</p>
       </div>
     </motion.article>
   )
